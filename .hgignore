@@ -1,0 +1,22 @@
+# C specific.
+\.a$
+\.o$
+
+# vim/emacs specific.
+^cscope\.out$
+^tags$
+^tags\.lock$
+^tags\.temp$
+\.swp$
+\.swo$
+
+# macOS specific.
+\.DS_Store$
+
+# Executables.
+^tmpupd$
+^tmpup$
+^extern/bcc/bcc$
+
+# Other files.
+^sql/.*\.h$
