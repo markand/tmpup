@@ -10,8 +10,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <jansson.h>
-
 /**
  * \def LEN
  * \brief Return the size of an array.
@@ -225,38 +223,5 @@ eopen_memstream(char **buf, size_t *bufsz);
  */
 FILE *
 efmemopen(void *buf, size_t bufsz, const char *mode);
-
-/**
- * Create a JSON representation using jansson json_pack.
- *
- * Conveniently wrap the function and exit on failure as unless a memory error
- * occurs it's more often a programming error.
- *
- * \param fmt the jansson format string
- * \return a newly allocated indented JSON representation
- */
-char *
-tmp_json(const char *fmt, ...);
-
-/**
- * Conveniently parse a JSON document from text representation and unpack it
- * directly.
- *
- * User will have ownership of JSON document pointed by *doc as extracted
- * values are borrowed from it. You need to call json_decref on *doc when no
- * longer needed.
- *
- * \pre doc != NULL
- * \pre err != NULL
- * \pre text != NULL
- * \pre fmt != NULL
- * \param doc pointer to a json_t object that will be set to
- * \param err error object destination
- * \param text the JSON document to parse
- * \param fmt the format string and arguments to json_unpack
- * \return 0 on success or -1 on error
- */
-int
-tmp_parse(json_t **doc, json_error_t *err, const char *text, const char *fmt, ...);
 
 #endif /* !UTIL_H */

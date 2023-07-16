@@ -2,13 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "db.h"
 #include "image.h"
-#include "log.h"
-#include "tmpupd.h"
+#include "tmp.h"
 #include "util.h"
-
-#include "sql/image-delete.h"
 
 void
 image_init(struct image *image,
@@ -21,48 +17,19 @@ image_init(struct image *image,
            time_t end)
 {
 	assert(image);
-	assert(title);
-	assert(author);
-	assert(filename);
 	assert(data);
 
 	if (id)
 		image->id = estrdup(id);
 	else
-		image->id = tmpupd_newid();
+		image->id = NULL;
 
-	if (!title)
-	image->title = estrdup(title);
-	image->author = estrdup(author);
-	image->filename = estrdup(filename);
+	image->title = estrdup(title ? title : TMP_DEFAULT_TITLE);
+	image->author = estrdup(author ? author : TMP_DEFAULT_AUTHOR);
+	image->filename = estrdup(filename ? filename : TMP_DEFAULT_FILENAME);
 	image->data = estrdup(data);
 	image->start = start;
 	image->end = end;
-}
-
-int
-image_save(struct image *image, struct db *db)
-{
-	assert(image);
-	assert(db);
-
-	return db_execf(db, "ssssstt",
-	    image->id,
-	    image->title,
-	    image->author,
-	    image->filename,
-	    image->data,
-	    image->start,
-	    image->end
-	);
-}
-
-int
-image_delete(struct image *image, struct db *db)
-{
-	assert(image);
-
-	return db_execf(db, (const char *)sql_image_delete, "s", image->id);
 }
 
 void
@@ -113,11 +80,10 @@ image_parse(struct image *image, const char *text)
 	);
 
 	if (rv < 0)
-		log_warn("image: parse error: %s", err.text);
-	else {
-		image_init(image, NULL, title, author, filename, data, start, end);
-		json_decref(doc);
-	}
+		return -1;
 
-	return rv;
+	image_init(image, NULL, title, author, filename, data, start, end);
+	json_decref(doc);
+
+	return 0;
 }

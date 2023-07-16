@@ -4,24 +4,27 @@
 
 #include "http.h"
 #include "log.h"
+#include "page-api-v0-paste.h"
 #include "page-index.h"
 #include "page-paste.h"
 #include "page-status.h"
 #include "util.h"
 
 /* Need to use this to avoid "uninitialized regex field". smh. */
-#define PAGE(p, e) \
-	{ .path = p, .exec = e }
+#define GET(p, e)       { .method = KMETHOD_GET,  .path = p, .exec = e }
+#define POST(p, e)      { .method = KMETHOD_POST, .path = p, .exec = e }
 
 struct page {
+	enum kmethod method;
 	const char *path;
 	void (*exec)(struct kreq *, const char * const *);
 	regex_t regex;
 };
 
 static struct page pages[] = {
-	PAGE("^/$", page_index),
-	PAGE("^/paste/([a-z0-9]+)$", page_paste)
+	GET  ("^/$",                    page_index),
+	POST ("^/api/v0/paste$",        page_api_v0_paste),
+	GET  ("^/paste/([a-z0-9]+)$",   page_paste),
 };
 
 static inline char **
@@ -81,6 +84,8 @@ http_process(struct kreq *r)
 	for (size_t i = 0; i < LEN(pages); ++i) {
 		iter = &pages[i];
 
+		if (r->method != iter->method)
+			continue;
 		if (regexec(&iter->regex, r->fullpath, LEN(matches), matches, 0) == 0) {
 			page = iter;
 			break;
@@ -88,7 +93,7 @@ http_process(struct kreq *r)
 	}
 
 	if (!page)
-		page_status(r, KHTTP_404);
+		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
 	else {
 		args = makeargs(r->fullpath, matches, LEN(matches));
 		page->exec(r, (const char * const *)args);

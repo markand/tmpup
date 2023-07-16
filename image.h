@@ -3,12 +3,6 @@
 
 #include <time.h>
 
-struct db;
-
-#define IMAGE_DEFAULT_TITLE     "blank"
-#define IMAGE_DEFAULT_AUTHOR    "anonymous"
-#define IMAGE_DEFAULT_FILENAME  "blank"
-
 struct image {
 	char *id;
 	char *title;
@@ -28,12 +22,6 @@ image_init(struct image *image,
            const char *data,
            time_t start,
            time_t end);
-
-int
-image_save(struct image *, struct db *);
-
-int
-image_delete(struct image *, struct db *);
 
 void
 image_finish(struct image *);

@@ -1,8 +1,6 @@
 #ifndef TMPUPD_H
 #define TMPUPD_H
 
-#define TMPUPD_ID_LEN 9
-
 struct db;
 enum db_mode;
 

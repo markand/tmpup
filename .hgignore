@@ -1,5 +1,6 @@
 # C specific.
 \.a$
+\.d$
 \.o$
 
 # vim/emacs specific.
@@ -20,3 +21,4 @@
 
 # Other files.
 ^sql/.*\.h$
+^core$

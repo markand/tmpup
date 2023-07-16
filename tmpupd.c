@@ -129,18 +129,6 @@ tmpupd_open(struct db *db, enum db_mode mode)
 	return 0;
 }
 
-char *
-tmpupd_newid(void)
-{
-	static char charset[] = "abcdefghijklmnopqrstuvwxyz0123456789";
-	char id[TMPUPD_ID_LEN] = {0};
-
-	for (size_t i = 0; i < sizeof (id) - 1; ++i)
-		id[i] = charset[random() % sizeof (charset)];
-
-	return estrdup(id);
-}
-
 int
 main(int argc, char **argv)
 {

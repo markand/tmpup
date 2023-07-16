@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include <kcgi.h>
+#include <kcgihtml.h>
 
 void
 http_init(void);

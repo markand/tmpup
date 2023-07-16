@@ -15,8 +15,8 @@ create table if not exists `image`(
 	`author`        TEXT not NULL,
 	`filename`      TEXT not NULL,
 	`data`          TEXT not NULL,
-	`start`         TIMESTAMP not NULL,
-	`end`           TIMESTAMP not NULL
+	`start`         INTEGER not NULL,
+	`end`           INTEGER not NULL
 ) STRICT;
 
 create table if not exists `setting`(
