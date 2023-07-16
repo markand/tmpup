@@ -2,8 +2,8 @@ insert into `paste`(
 	`id`,
 	`title`,
 	`author`,
-	`language`,
 	`filename`,
+	`language`,
 	`code`,
 	`start`,
 	`end`

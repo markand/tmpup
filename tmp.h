@@ -5,11 +5,17 @@
 
 #include <jansson.h>
 
+#define TMP_ID_LEN 9
+
 #define TMP_DEFAULT_TITLE       "void"
 #define TMP_DEFAULT_AUTHOR      "anon"
 #define TMP_DEFAULT_FILENAME    "box"
 #define TMP_DEFAULT_LANG        "nohighlight"
-#define TMP_ID_LEN 9
+
+#define TMP_DURATION_HOUR       3600
+#define TMP_DURATION_DAY        86400
+#define TMP_DURATION_WEEK       604800
+#define TMP_DURATION_MONTH      2678400
 
 char *
 tmp_id(void);

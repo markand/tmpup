@@ -20,5 +20,6 @@
 ^extern/bcc/bcc$
 
 # Other files.
+^html/.*\.h$
 ^sql/.*\.h$
 ^core$

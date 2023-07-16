@@ -17,9 +17,10 @@ post(struct kreq *r)
 {
 	struct paste paste = {0};
 	struct db db;
+	char error[128] = {0};
 
-	if (!r->fieldsz || paste_parse(&paste, r->fields[0].val) < 0) {
-		page_status(r, KHTTP_400, KMIME_APP_JSON);
+	if (!r->fieldsz || paste_parse(&paste, r->fields[0].val, error, sizeof (error)) < 0) {
+		page_json(r, KHTTP_400, "{ss}", "error", error);
 		return;
 	}
 

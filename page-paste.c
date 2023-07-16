@@ -8,38 +8,72 @@
 #include "page.h"
 #include "paste.h"
 #include "tmpupd.h"
+#include "util.h"
+
+#include "html/paste.h"
 
 #define TAG "page-paste: "
+
+struct self {
+	struct db db;
+	struct paste paste;
+	struct kreq *req;
+	struct khtmlreq html;
+};
+
+enum {
+	KW_CODE
+};
+
+static const char * const keywords[] = {
+	[KW_CODE] = "code"
+};
+
+static int
+format(size_t index, void *data)
+{
+	struct self *self = data;
+
+	switch (index) {
+	case KW_CODE:
+		khtml_printf(&self->html, "%s", self->paste.code);
+		break;
+	default:
+		break;
+	}
+
+	return 1;
+}
 
 static void
 get(struct kreq *r, const char * const *args)
 {
-	struct db db;
-	struct paste paste;
-	struct khtmlreq html;
+	struct self self = {
+		.req = r
+	};
+	struct ktemplate kt = {
+		.key = keywords,
+		.keysz = LEN(keywords),
+		.cb = format,
+		.arg = &self
+	};
 
-	if (tmpupd_open(&db, DB_RDONLY) < 0) {
+	if (tmpupd_open(&self.db, DB_RDONLY) < 0) {
 		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
 		return;
 	}
 
-	// TODO: check between not found and error.
 	log_debug(TAG "searching paste '%s'", args[0]);
 
-	if (db_paste_get(&paste, args[0], &db) < 0)
-		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
+	if (db_paste_get(&self.paste, args[0], &self.db) < 0)
+		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
 	else {
-		khttp_head(r, kresps[KRESP_STATUS], "%s", khttps[KHTTP_200]);
-		khttp_head(r, kresps[KRESP_CONTENT_TYPE], "%s", kmimetypes[KMIME_TEXT_HTML]);
-		khttp_body(r);
-
-		// TODO: real page here.
-		khtml_open(&html, r, 0);
-		khtml_printf(&html, "%s\n", paste.code);
-		khtml_close(&html);
+		khtml_open(&self.html, self.req, 0);
+		page_template(self.req, KHTTP_200, &kt, html_paste, sizeof (html_paste));
+		khtml_close(&self.html);
 	}
 
-	db_finish(&db);
+	db_finish(&self.db);
 }
 
 static void

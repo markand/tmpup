@@ -7,6 +7,7 @@
 
 #include "sql/paste-delete.h"
 #include "sql/paste-get.h"
+#include "sql/paste-recents.h"
 #include "sql/paste-save.h"
 
 static void
@@ -51,8 +52,6 @@ db_paste_get(struct paste *paste, const char *id, struct db *db)
 	assert(id);
 	assert(db);
 
-	memset(paste, 0, sizeof (*paste));
-
 	struct db_select select = {
 		.data = paste,
 		.datasz = 1,
@@ -61,6 +60,22 @@ db_paste_get(struct paste *paste, const char *id, struct db *db)
 	};
 
 	return db_select(db, &select, (const char *)sql_paste_get, "s", id);
+}
+
+ssize_t
+db_paste_recents(struct paste *pastes, size_t pastesz, struct db *db)
+{
+	assert(pastes);
+	assert(db);
+
+	struct db_select select = {
+		.data = pastes,
+		.datasz = pastesz,
+		.elemsz = sizeof (*pastes),
+		.get = get
+	};
+
+	return db_select(db, &select, (const char *)sql_paste_recents, "z", pastesz);
 }
 
 int

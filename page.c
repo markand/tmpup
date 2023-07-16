@@ -44,6 +44,23 @@ json(enum khttp code, const char *msg)
 }
 
 void
+page_template(struct kreq *r,
+              enum khttp code,
+              const struct ktemplate *kt,
+              const unsigned char *html,
+              size_t htmlsz)
+{
+	assert(r);
+	assert(kt);
+	assert(html);
+
+	khttp_head(r, kresps[KRESP_STATUS], "%s", khttps[code]);
+	khttp_head(r, kresps[KRESP_CONTENT_TYPE], "%s", kmimetypes[KMIME_TEXT_HTML]);
+	khttp_body(r);
+	khttp_template_buf(r, kt, (const char *)html, htmlsz);
+}
+
+void
 page_status(struct kreq *r, enum khttp code, enum kmime mime)
 {
 	assert(r);

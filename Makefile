@@ -6,10 +6,18 @@ SQL_SRCS :=     sql/init.sql \
                 sql/image-save.sql \
                 sql/paste-delete.sql \
                 sql/paste-get.sql \
+                sql/paste-recents.sql \
                 sql/paste-save.sql
 SQL_OBJS :=     $(SQL_SRCS:.sql=.h)
 
+HTML_SRCS :=    html/footer.html \
+                html/header.html \
+                html/index.html \
+                html/paste.html
+HTML_OBJS :=    $(HTML_SRCS:.html=.h)
+
 TMPUPD_SRCS :=  extern/libsqlite/sqlite3.c \
+                check.c \
                 db-image.c \
                 db-paste.c \
                 db.c \
@@ -28,7 +36,7 @@ TMPUPD_SRCS :=  extern/libsqlite/sqlite3.c \
 TMPUPD_OBJS :=  $(TMPUPD_SRCS:.c=.o)
 TMPUPD_DEPS :=  $(TMPUPD_SRCS:.c=.d)
 
-TMPUP_SRCS :=   image.c paste.c tmp.c tmpup.c util.c
+TMPUP_SRCS :=   check.c image.c paste.c tmp.c tmpup.c util.c
 TMPUP_OBJS :=   $(TMPUP_SRCS:.c=.o)
 TMPUP_DEPS :=   $(TMPUP_SRCS:.c=.d)
 
@@ -53,6 +61,9 @@ override CFLAGS +=   -Iextern/libsqlite
 %.h: %.sql
 	extern/bcc/bcc -0cs $< $< > $@
 
+%.h: %.html
+	extern/bcc/bcc -cs $< $< > $@
+
 all: tmpupd tmpup
 
 # disable warnings on SQLite...
@@ -64,7 +75,7 @@ $(SQL_OBJS): extern/bcc/bcc
 
 -include $(TMPUPD_DEPS)
 
-$(TMPUPD_SRCS): $(SQL_OBJS)
+$(TMPUPD_SRCS): $(HTML_OBJS) $(SQL_OBJS)
 $(TMPUPD_OBJS): private CFLAGS += $(JANSSON_INCS) $(KCGI_INCS)
 
 tmpupd: private LDLIBS += $(JANSSON_LIBS) $(KCGI_LIBS)
@@ -81,7 +92,7 @@ tmpup: $(TMPUP_OBJS)
 
 clean:
 	rm -f extern/bcc/bcc extern/libsqlite/sqlite3.o
-	rm -f $(SQL_OBJS)
+	rm -f $(HTML_OBJS) $(SQL_OBJS)
 	rm -f tmpupd $(TMPUPD_OBJS) $(TMPUPD_DEPS)
 	rm -f tmpup $(TMPUP_OBJS) $(TMPUP_DEPS)
 

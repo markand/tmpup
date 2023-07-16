@@ -10,6 +10,7 @@
 
 #include "image.h"
 #include "paste.h"
+#include "tmp.h"
 #include "util.h"
 
 struct req {
@@ -64,6 +65,7 @@ post(struct req *req, const char *url, const char *body)
 	CURL *curl;
 	FILE *fp;
 	char *resp = NULL, httperr[CURL_ERROR_SIZE] = {0}, path[256] = {0};
+	const char *message;
 	size_t respsz = 0;
 	json_error_t resperr;
 
@@ -109,6 +111,10 @@ post(struct req *req, const char *url, const char *body)
 	/* Try to decode JSON. */
 	if (!(req->doc = json_loads(resp, 0, &resperr)))
 		die("abort: %s\n", resperr.text);
+
+	/* For convenience, check if there is an error message. */
+	if (json_unpack(req->doc, "{ss}", "error", &message) == 0)
+		die("abort: %s\n", message);
 
 	free(resp);
 }
@@ -169,34 +175,19 @@ cmp_cmd(const void *key, const void *val)
 	return strcmp(key, ((const struct cmd *)val)->name);
 }
 
-static int
-cmp_str(const void *key, const void *val)
-{
-	return strcmp(key, val);
-}
-
 static inline void
 set_duration(const char *arg)
 {
 	if (strcmp(arg, "hour") == 0)
-		end += 3600;
+		end += TMP_DURATION_HOUR;
 	else if (strcmp(arg, "day") == 0)
-		end += 86400;
+		end += TMP_DURATION_DAY;
 	else if (strcmp(arg, "week") == 0)
-		end += 604800;
+		end += TMP_DURATION_WEEK;
 	else if (strcmp(arg, "month") == 0)
-		end += 2678400;
+		end += TMP_DURATION_MONTH;
 	else
 		die("abort: invalid duration '%s'\n", arg);
-}
-
-static inline void
-set_lang(const char *arg)
-{
-	language = bsearch(arg, paste_langs, paste_langsz, sizeof (const char *), cmp_str);
-
-	if (!language)
-		die("abort: invalid langage '%s'\n", arg); 
 }
 
 int
@@ -211,7 +202,7 @@ main(int argc, char **argv)
 	start = time(NULL);
 	end = start + 3600;
 
-	while ((ch = egetopt(argc, argv, "a:e:h:t:v")) != -1) {
+	while ((ch = egetopt(argc, argv, "a:e:f:h:l:t:v")) != -1) {
 		switch (ch) {
 		case 'a':
 			author = optarg;
@@ -226,7 +217,7 @@ main(int argc, char **argv)
 			host = optarg;
 			break;
 		case 'l':
-			set_lang(optarg);
+			language = optarg;
 			break;
 		case 't':
 			title = optarg;

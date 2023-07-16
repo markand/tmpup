@@ -1,5 +1,5 @@
-#ifndef TMPUP_PASTE_H
-#define TMPUP_PASTE_H
+#ifndef TMP_PASTE_H
+#define TMP_PASTE_H
 
 #include <stddef.h>
 #include <time.h>
@@ -36,6 +36,6 @@ char *
 paste_dump(const struct paste *paste);
 
 int
-paste_parse(struct paste *paste, const char *text);
+paste_parse(struct paste *paste, const char *text, char *error, size_t errorsz);
 
-#endif /* !TMPUP_PASTE_H */
+#endif /* !TMP_PASTE_H */

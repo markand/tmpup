@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "check.h"
 #include "paste.h"
-#include "util.h"
 #include "tmp.h"
+#include "util.h"
 
 const char * const paste_langs[] = {
 	"1c",
@@ -249,7 +250,7 @@ paste_dump(const struct paste *paste)
 }
 
 int
-paste_parse(struct paste *paste, const char *text)
+paste_parse(struct paste *paste, const char *text, char *error, size_t errorsz)
 {
 	const char *title = NULL, *author = NULL, *filename = NULL, *language = NULL, *code = NULL;
 	json_int_t start = 0, end = 0;
@@ -268,7 +269,14 @@ paste_parse(struct paste *paste, const char *text)
 		"end",          &end
 	);
 
-	if (rv < 0)
+	if (rv < 0) {
+		bstrlcpy(error, err.text, errorsz);
+		return -1;
+	}
+
+	/* Check language exists. */
+	if (check_language(language, error, errorsz) < 0 ||
+	    check_duration(start, end, error, errorsz) < 0)
 		return -1;
 
 	paste_init(paste, NULL, title, author, filename, language, code, start, end);
