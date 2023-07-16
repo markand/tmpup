@@ -23,7 +23,7 @@ get(sqlite3_stmt *stmt, void *data)
 		(const char *)sqlite3_column_text(stmt, 4),
 		(const char *)sqlite3_column_text(stmt, 5),
 		(time_t)sqlite3_column_int64(stmt, 6),
-		(time_t)sqlite3_column_int64(stmt, 6)
+		(time_t)sqlite3_column_int64(stmt, 7)
 	);
 }
 

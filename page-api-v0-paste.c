@@ -17,7 +17,7 @@ post(struct kreq *r)
 {
 	struct paste paste = {0};
 	struct db db;
-	char error[128] = {0};
+	char error[128] = "invalid input";
 
 	if (!r->fieldsz || paste_parse(&paste, r->fields[0].val, error, sizeof (error)) < 0) {
 		page_json(r, KHTTP_400, "{ss}", "error", error);

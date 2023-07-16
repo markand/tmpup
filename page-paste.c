@@ -7,6 +7,7 @@
 #include "page-paste.h"
 #include "page.h"
 #include "paste.h"
+#include "tmp.h"
 #include "tmpupd.h"
 #include "util.h"
 
@@ -22,12 +23,36 @@ struct self {
 };
 
 enum {
-	KW_CODE
+	KW_AUTHOR,
+	KW_CODE,
+	KW_EXPIRES,
+	KW_ID,
+	KW_TITLE
 };
 
 static const char * const keywords[] = {
-	[KW_CODE] = "code"
+	[KW_AUTHOR]     = "author",
+	[KW_EXPIRES]    = "expires",
+	[KW_ID]         = "id",
+	[KW_TITLE]      = "title",
+	[KW_CODE]       = "code"
 };
+
+static const char *
+expires(time_t start, time_t end)
+{
+	static _Thread_local char ret[64];
+	unsigned long long gap = end - start;
+
+	if (gap < TMP_DURATION_HOUR)
+		sprintf(ret, "%llu minutes", gap / 60);
+	else if (gap < TMP_DURATION_DAY)
+		sprintf(ret, "%llu hours", gap / TMP_DURATION_HOUR);
+	else
+		sprintf(ret, "%llu days", gap / TMP_DURATION_DAY);
+
+	return ret;
+}
 
 static int
 format(size_t index, void *data)
@@ -35,8 +60,20 @@ format(size_t index, void *data)
 	struct self *self = data;
 
 	switch (index) {
+	case KW_AUTHOR:
+		khtml_printf(&self->html, "%s", self->paste.author);
+		break;
 	case KW_CODE:
 		khtml_printf(&self->html, "%s", self->paste.code);
+		break;
+	case KW_EXPIRES:
+		khtml_printf(&self->html, "%s", expires(self->paste.start, self->paste.end));
+		break;
+	case KW_ID:
+		khtml_printf(&self->html, "%s", self->paste.id);
+		break;
+	case KW_TITLE:
+		khtml_printf(&self->html, "%s", self->paste.title);
 		break;
 	default:
 		break;

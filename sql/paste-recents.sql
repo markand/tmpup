@@ -1,4 +1,4 @@
   select *
     from `paste`
-order by `start` asc
+order by `start` desc
    limit ?
