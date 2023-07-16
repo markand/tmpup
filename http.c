@@ -7,7 +7,7 @@
 #include "page-api-v0-paste.h"
 #include "page-index.h"
 #include "page-paste.h"
-#include "page-status.h"
+#include "page.h"
 #include "util.h"
 
 /* Need to use this to avoid "uninitialized regex field". smh. */

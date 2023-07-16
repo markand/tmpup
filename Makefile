@@ -70,6 +70,7 @@ all: tmpupd tmpup
 extern/libsqlite/sqlite3.o: private CPPFLAGS += -Wno-unused-parameter
 
 $(SQL_OBJS): extern/bcc/bcc
+$(HTML_OBJS): extern/bcc/bcc
 
 # tmpupd
 
