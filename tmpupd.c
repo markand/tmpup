@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -9,6 +10,7 @@
 #include "http.h"
 #include "log.h"
 #include "maint.h"
+#include "tmp.h"
 #include "tmpupd.h"
 #include "util.h"
 
@@ -127,6 +129,22 @@ tmpupd_open(struct db *db, enum db_mode mode)
 	}
 
 	return 0;
+}
+
+const char *
+tmpupd_expiresin(time_t start, time_t end)
+{
+	static _Thread_local char ret[64];
+	unsigned long long gap = end - start;
+
+	if (gap < TMP_DURATION_HOUR)
+		sprintf(ret, "%llu minutes", gap / 60);
+	else if (gap < TMP_DURATION_DAY)
+		sprintf(ret, "%llu hours", gap / TMP_DURATION_HOUR);
+	else
+		sprintf(ret, "%llu days", gap / TMP_DURATION_DAY);
+
+	return ret;
 }
 
 int

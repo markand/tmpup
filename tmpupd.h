@@ -1,6 +1,8 @@
 #ifndef TMPUPD_H
 #define TMPUPD_H
 
+#include <time.h>
+
 struct db;
 enum db_mode;
 
@@ -14,5 +16,8 @@ tmpupd_open(struct db *, enum db_mode);
  */
 char *
 tmpupd_newid(void);
+
+const char *
+tmpupd_expiresin(time_t start, time_t end);
 
 #endif /* !TMPUPD_H */

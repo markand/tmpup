@@ -27,7 +27,8 @@ static int debug = 0;
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: tmpup paste [file]\n");
+	fprintf(stderr, "usage: tmpup image [file]\n");
+	fprintf(stderr, "       tmpup paste [file]\n");
 	exit(1);
 }
 
@@ -131,24 +132,43 @@ req_finish(struct req *req)
 static void
 cmd_image(int argc, char **argv)
 {
-	(void)argc;
-	(void)argv;
+	struct image image;
+	struct req req;
+	const char *id;
+	char *contents, *dump;
+
+	contents = readall(argc >= 2 ? argv[1] : NULL);
+
+	image_init(&image, NULL, title, author, filename, contents, start, end);
+	dump = image_dump(&image);
+
+	post(&req, "api/v0/image", dump);
+
+	if (req.status != 201)
+		die("abort: HTTP %ld\n", req.status);
+	if (json_unpack(req.doc, "{ss}", "id", &id) == 0)
+		printf("%s/paste/%s\n", host, id);
+
+	image_finish(&image);
+
+	req_finish(&req);
+
+	free(contents);
+	free(dump);
 }
 
 static void
 cmd_paste(int argc, char **argv)
 {
-	const char *id;
-	char *code, *dump;
 	struct paste paste;
 	struct req req;
+	const char *id;
+	char *code, *dump;
 
 	code = readall(argc >= 2 ? argv[1] : NULL);
 
 	paste_init(&paste, NULL, title, author, filename, language, code, start, end);
 	dump = paste_dump(&paste);
-	paste_finish(&paste);
-	free(code);
 
 	post(&req, "api/v0/paste", dump);
 
@@ -157,7 +177,12 @@ cmd_paste(int argc, char **argv)
 	if (json_unpack(req.doc, "{ss}", "id", &id) == 0)
 		printf("%s/paste/%s\n", host, id);
 
+	paste_finish(&paste);
+
 	req_finish(&req);
+
+	free(code);
+	free(dump);
 }
 
 static struct cmd {

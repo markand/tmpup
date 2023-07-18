@@ -7,7 +7,6 @@
 #include "page-paste.h"
 #include "page.h"
 #include "paste.h"
-#include "tmp.h"
 #include "tmpupd.h"
 #include "util.h"
 
@@ -38,22 +37,6 @@ static const char * const keywords[] = {
 	[KW_CODE]       = "code"
 };
 
-static const char *
-expires(time_t start, time_t end)
-{
-	static _Thread_local char ret[64];
-	unsigned long long gap = end - start;
-
-	if (gap < TMP_DURATION_HOUR)
-		sprintf(ret, "%llu minutes", gap / 60);
-	else if (gap < TMP_DURATION_DAY)
-		sprintf(ret, "%llu hours", gap / TMP_DURATION_HOUR);
-	else
-		sprintf(ret, "%llu days", gap / TMP_DURATION_DAY);
-
-	return ret;
-}
-
 static int
 format(size_t index, void *data)
 {
@@ -67,7 +50,7 @@ format(size_t index, void *data)
 		khtml_printf(&self->html, "%s", self->paste.code);
 		break;
 	case KW_EXPIRES:
-		khtml_printf(&self->html, "%s", expires(self->paste.start, self->paste.end));
+		khtml_printf(&self->html, "%s", tmpupd_expiresin(self->paste.start, self->paste.end));
 		break;
 	case KW_ID:
 		khtml_printf(&self->html, "%s", self->paste.id);
@@ -102,12 +85,18 @@ get(struct kreq *r, const char * const *args)
 
 	log_debug(TAG "searching paste '%s'", args[0]);
 
-	if (db_paste_get(&self.paste, args[0], &self.db) < 0)
-		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
-	else {
+	switch (db_paste_get(&self.paste, args[0], &self.db)) {
+	case 1:
 		khtml_open(&self.html, self.req, 0);
 		page_template(self.req, KHTTP_200, &kt, html_paste, sizeof (html_paste));
 		khtml_close(&self.html);
+		break;
+	case 0:
+		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
+		break;
+	default:
+		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
+		break;
 	}
 
 	db_finish(&self.db);

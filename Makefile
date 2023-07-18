@@ -3,6 +3,8 @@ CFLAGS :=       -g -O0 -Wall -Wextra
 
 SQL_SRCS :=     sql/init.sql \
                 sql/image-delete.sql \
+                sql/image-get.sql \
+                sql/image-recents.sql \
                 sql/image-save.sql \
                 sql/paste-delete.sql \
                 sql/paste-get.sql \

@@ -2,9 +2,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "db-image.h"
 #include "db-paste.h"
 #include "db.h"
 #include "http.h"
+#include "image.h"
 #include "page-index.h"
 #include "page.h"
 #include "paste.h"
@@ -22,14 +24,15 @@ struct self {
 };
 
 enum {
+	KW_IMAGES,
 	KW_PASTES
 };
 
 static const char * const keywords[] = {
-	[KW_PASTES] = "pastes"
+	[KW_IMAGES] = "images",
+	[KW_PASTES] = "pastes",
 };
 
-// TODO: move this somewhere.
 static const char *
 url(const char *fmt, ...)
 {
@@ -91,12 +94,58 @@ format_pastes(struct self *self)
 	}
 }
 
+static void
+format_images(struct self *self)
+{
+	struct image images[LIMIT] = {}, *img;
+	ssize_t imagesz;
+
+	if ((imagesz = db_image_recents(images, LEN(images), &self->db)) < 0)
+		return;
+
+	for (ssize_t i = 0; i < imagesz; ++i) {
+		img = &images[i];
+
+		khtml_elem(&self->html, KELEM_TR);
+
+		/* id */
+		khtml_elem(&self->html, KELEM_TD);
+		khtml_attr(&self->html, KELEM_A,
+		    KATTR_HREF, url("paste/%s", img->id),
+		    KATTR__MAX);
+		khtml_printf(&self->html, "%s", img->id);
+		khtml_closeelem(&self->html, 2);
+
+		/* title */
+		khtml_elem(&self->html, KELEM_TD);
+		khtml_printf(&self->html, "%s", img->title);
+		khtml_closeelem(&self->html, 1);
+
+		/* author */
+		khtml_elem(&self->html, KELEM_TD);
+		khtml_printf(&self->html, "%s", img->author);
+		khtml_closeelem(&self->html, 1);
+
+		/* expiration */
+		khtml_elem(&self->html, KELEM_TD);
+		khtml_printf(&self->html, "%s", tmpupd_expiresin(img->start, img->end));
+		khtml_closeelem(&self->html, 1);
+
+		khtml_closeelem(&self->html, 0);
+
+		image_finish(img);
+	}
+}
+
 static int
 format(size_t index, void *arg)
 {
 	switch (index) {
 	case KW_PASTES:
 		format_pastes(arg);
+		break;
+	case KW_IMAGES:
+		format_images(arg);
 		break;
 	default:
 		break;

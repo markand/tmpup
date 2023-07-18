@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "check.h"
 #include "image.h"
 #include "tmp.h"
 #include "util.h"
@@ -61,7 +62,7 @@ image_dump(const struct image *image)
 }
 
 int
-image_parse(struct image *image, const char *text)
+image_parse(struct image *image, const char *text, char *error, size_t errorsz)
 {
 	const char *title = NULL, *author = NULL, *filename = NULL, *data = NULL;
 	json_int_t start = 0, end = 0;
@@ -79,7 +80,11 @@ image_parse(struct image *image, const char *text)
 		"end",          &end
 	);
 
-	if (rv < 0)
+	if (rv < 0) {
+		bstrlcpy(error, err.text, errorsz);
+		return -1;
+	}
+	if (check_duration(start, end, error, errorsz) < 0)
 		return -1;
 
 	image_init(image, NULL, title, author, filename, data, start, end);

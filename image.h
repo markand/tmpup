@@ -30,6 +30,6 @@ char *
 image_dump(const struct image *);
 
 int
-image_parse(struct image *, const char *);
+image_parse(struct image *image, const char *text, char *error, size_t errorsz);
 
 #endif /* !TMPUP_IMAGE_H */

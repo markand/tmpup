@@ -21,7 +21,7 @@ compare(const void *key, const void *value)
 	const enum khttp *code = key;
 	const struct status *status = value;
 
-	return status->code - *code;
+	return *code - status->code;
 }
 
 static inline const char *
