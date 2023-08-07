@@ -1,40 +1,41 @@
 CC :=           clang
 CFLAGS :=       -g -O0 -Wall -Wextra
 
-SQL_SRCS :=     sql/init.sql \
-                sql/image-delete.sql \
-                sql/image-get.sql \
-                sql/image-recents.sql \
-                sql/image-save.sql \
-                sql/paste-delete.sql \
-                sql/paste-get.sql \
-                sql/paste-recents.sql \
-                sql/paste-save.sql
+SQL_SRCS :=     sql/init.sql
+SQL_SRCS +=     sql/image-delete.sql
+SQL_SRCS +=     sql/image-get.sql
+SQL_SRCS +=     sql/image-recents.sql
+SQL_SRCS +=     sql/image-save.sql
+SQL_SRCS +=     sql/paste-delete.sql
+SQL_SRCS +=     sql/paste-get.sql
+SQL_SRCS +=     sql/paste-recents.sql
+SQL_SRCS +=     sql/paste-save.sql
 SQL_OBJS :=     $(SQL_SRCS:.sql=.h)
 
-HTML_SRCS :=    html/footer.html \
-                html/header.html \
-                html/index.html \
-                html/paste.html
+HTML_SRCS :=    html/footer.html
+HTML_SRCS +=    html/header.html
+HTML_SRCS +=    html/index.html
+HTML_SRCS +=    html/paste.html
 HTML_OBJS :=    $(HTML_SRCS:.html=.h)
 
-TMPUPD_SRCS :=  extern/libsqlite/sqlite3.c \
-                check.c \
-                db-image.c \
-                db-paste.c \
-                db.c \
-                http.c \
-                image.c \
-                log.c \
-                maint.c \
-                page-api-v0-paste.c \
-                page-index.c \
-                page-paste.c \
-                page.c \
-                paste.c \
-                tmp.c \
-                tmpupd.c \
-                util.c
+TMPUPD_SRCS :=  extern/libsqlite/sqlite3.c
+TMPUPD_SRCS +=  check.c
+TMPUPD_SRCS +=  db-image.c
+TMPUPD_SRCS +=  db-paste.c
+TMPUPD_SRCS +=  db.c
+TMPUPD_SRCS +=  http.c
+TMPUPD_SRCS +=  image.c
+TMPUPD_SRCS +=  log.c
+TMPUPD_SRCS +=  maint.c
+TMPUPD_SRCS +=  page-api-v0-paste.c
+TMPUPD_SRCS +=  page-api-v0-image.c
+TMPUPD_SRCS +=  page-index.c
+TMPUPD_SRCS +=  page-paste.c
+TMPUPD_SRCS +=  page.c
+TMPUPD_SRCS +=  paste.c
+TMPUPD_SRCS +=  tmp.c
+TMPUPD_SRCS +=  tmpupd.c
+TMPUPD_SRCS +=  util.c
 TMPUPD_OBJS :=  $(TMPUPD_SRCS:.c=.o)
 TMPUPD_DEPS :=  $(TMPUPD_SRCS:.c=.d)
 
@@ -51,14 +52,17 @@ JANSSON_LIBS := $(shell pkg-config --libs jansson)
 KCGI_INCS :=    $(shell pkg-config --cflags kcgi kcgi-html)
 KCGI_LIBS :=    $(shell pkg-config --libs kcgi kcgi-html)
 
-override CPPFLAGS += -DSQLITE_DEFAULT_FOREIGN_KEYS=1 \
-                     -DSQLITE_DEFAULT_MEMSTATUS=0 \
-                     -DSQLITE_OMIT_DECLTYPE \
-                     -DSQLITE_OMIT_DEPRECATED \
-                     -DSQLITE_OMIT_LOAD_EXTENSION \
-                     -DSQLITE_THREADSAFE=0 \
-                     -MMD
-override CFLAGS +=   -Iextern/libsqlite
+MAGIC_INCS :=   $(shell pkg-config --cflags libmagic)
+MAGIC_LIBS :=   $(shell pkg-config --libs libmagic)
+
+override CPPFLAGS += -DSQLITE_DEFAULT_FOREIGN_KEYS=1
+override CPPFLAGS += -DSQLITE_DEFAULT_MEMSTATUS=0
+override CPPFLAGS += -DSQLITE_OMIT_DECLTYPE
+override CPPFLAGS += -DSQLITE_OMIT_DEPRECATED
+override CPPFLAGS += -DSQLITE_OMIT_LOAD_EXTENSION
+override CPPFLAGS += -DSQLITE_THREADSAFE=0
+override CPPFLAGS += -MMD
+override CFLAGS   += -Iextern/libsqlite
 
 %.h: %.sql
 	extern/bcc/bcc -0cs $< $< > $@
@@ -79,22 +83,22 @@ $(HTML_OBJS): extern/bcc/bcc
 -include $(TMPUPD_DEPS)
 
 $(TMPUPD_SRCS): $(HTML_OBJS) $(SQL_OBJS)
-$(TMPUPD_OBJS): private CFLAGS += $(JANSSON_INCS) $(KCGI_INCS)
+$(TMPUPD_OBJS): private CFLAGS += $(JANSSON_INCS) $(KCGI_INCS) $(MAGIC_INCS)
 
-tmpupd: private LDLIBS += $(JANSSON_LIBS) $(KCGI_LIBS)
+tmpupd: private LDLIBS += $(JANSSON_LIBS) $(KCGI_LIBS) $(MAGIC_LIBS)
 tmpupd: $(TMPUPD_OBJS)
 
 # tmpup
 
 -include $(TMPUP_DEPS)
 
-$(TMPUP_OBJS): private CFLAGS += $(CURL_INCS) $(JANSSON_INCS)
+$(TMPUP_OBJS): private CFLAGS += $(CURL_INCS) $(JANSSON_INCS) $(MAGIC_INCS)
 
-tmpup: private LDLIBS += $(CURL_LIBS) $(JANSSON_LIBS)
+tmpup: private LDLIBS += $(CURL_LIBS) $(JANSSON_LIBS) $(MAGIC_LIBS)
 tmpup: $(TMPUP_OBJS)
 
 clean:
-	rm -f extern/bcc/bcc extern/libsqlite/sqlite3.o
+	rm -f extern/bcc/bcc
 	rm -f $(HTML_OBJS) $(SQL_OBJS)
 	rm -f tmpupd $(TMPUPD_OBJS) $(TMPUPD_DEPS)
 	rm -f tmpup $(TMPUP_OBJS) $(TMPUP_DEPS)

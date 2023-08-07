@@ -2,14 +2,25 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <magic.h>
+
 #include "paste.h"
 #include "tmp.h"
 #include "util.h"
+
+static magic_t cookie;
 
 static int
 cmp_str(const void *key, const void *val)
 {
 	return strcmp(key, *(const char **)val);
+}
+
+void
+check_init(void)
+{
+	if (!(cookie = magic_open(MAGIC_SYMLINK | MAGIC_MIME)))
+
 }
 
 int
@@ -48,4 +59,9 @@ check_duration(time_t start, time_t end, char *error, size_t errorsz)
 	}
 
 	return 0;
+}
+
+void
+check_finish(void)
+{
 }
