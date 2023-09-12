@@ -50,17 +50,17 @@ usage(void)
 	exit(1);
 }
 
-static char *
-readall(const char *file)
+static void
+readall(const char *file, char **dst, size_t *dstsz)
 {
 	FILE *in = stdin, *out;
-	char *text = NULL, tmp[BUFSIZ];
-	size_t textsz = 0, nr;
+	char tmp[BUFSIZ];
+	size_t nr;
 
 	if (file && !(in = fopen(file, "r")))
 		die("abort: %s: %s\n", file, strerror(errno));
 
-	out = eopen_memstream(&text, &textsz);
+	out = eopen_memstream(dst, dstsz);
 
 	while ((nr = fread(tmp, 1, sizeof (tmp), in))) {
 		if (fwrite(tmp, 1, nr, out) != nr)
@@ -73,8 +73,6 @@ readall(const char *file)
 	/* We won't use in anymore so that's fine. */
 	fclose(in);
 	fclose(out);
-
-	return text;
 }
 
 static void
@@ -153,11 +151,13 @@ cmd_image(int argc, char **argv)
 	struct image image;
 	struct req req;
 	const char *id;
-	char *contents, *dump;
+	char *contents = NULL, *dump;
+	size_t contentsz = 0;
 
-	contents = readall(argc >= 2 ? argv[1] : NULL);
+	readall(argc >= 2 ? argv[1] : NULL, &contents, &contentsz);
 
-	image_init(&image, NULL, title, author, filename, contents, start, end);
+	image_init(&image, NULL, title, author, filename,
+	    (const unsigned char *)contents, contentsz, start, end);
 	dump = image_dump(&image);
 
 	post(&req, "api/v0/image", dump);
@@ -165,7 +165,7 @@ cmd_image(int argc, char **argv)
 	if (req.status != 201)
 		die("abort: HTTP %ld\n", req.status);
 	if (json_unpack(req.doc, "{ss}", "id", &id) == 0)
-		printf("%s/paste/%s\n", host, id);
+		printf("%s/image/%s\n", host, id);
 
 	image_finish(&image);
 
@@ -182,8 +182,9 @@ cmd_paste(int argc, char **argv)
 	struct req req;
 	const char *id;
 	char *code, *dump;
+	size_t codesz;
 
-	code = readall(argc >= 2 ? argv[1] : NULL);
+	readall(argc >= 2 ? argv[1] : NULL, &code, &codesz);
 
 	paste_init(&paste, NULL, title, author, filename, language, code, start, end);
 	dump = paste_dump(&paste);

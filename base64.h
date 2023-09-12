@@ -1,7 +1,7 @@
 /*
- * tmpupd.h -- tmpupd main files
+ * base64.h -- base64 encoding and decoding
  *
- * Copyright (c) 2023 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2023 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,29 +16,38 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef TMPUPD_H
-#define TMPUPD_H
+#ifndef BASE64_H
+#define BASE64_H
 
-#include <time.h>
+#include <stddef.h>
 
-struct db;
-enum db_mode;
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
-int
-tmpupd_open(struct db *, enum db_mode);
-
-/**
- * Create a somewhat unique identifier as much as we can.
- *
- * \return a newly allocated identifier (to be free'd)
- */
-char *
-tmpupd_newid(void);
-
-const char *
-tmpupd_expiresin(time_t start, time_t end);
+#define B64_ENCODE_LENGTH(x) (4 * ((x) / 3 + 1))
+#define B64_DECODE_LENGTH(x) (3 * ((x) / 4))
 
 int
-tmpupd_isimage(const char *data, size_t datasz);
+b64_isbase64(unsigned char);
 
-#endif /* !TMPUPD_H */
+int
+b64_isvalid(unsigned char);
+
+unsigned char
+b64_lookup(unsigned char);
+
+unsigned char
+b64_rlookup(unsigned char);
+
+size_t
+b64_encode(const unsigned char *, size_t, char *, size_t);
+
+size_t
+b64_decode(const char *, size_t, unsigned char *, size_t);
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* !BASE64_H */

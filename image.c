@@ -17,9 +17,11 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "base64.h"
 #include "check.h"
 #include "image.h"
 #include "tmp.h"
@@ -31,7 +33,8 @@ image_init(struct image *image,
            const char *title,
            const char *author,
            const char *filename,
-           const char *data,
+           const unsigned char *data,
+           size_t datasz,
            time_t start,
            time_t end)
 {
@@ -44,12 +47,13 @@ image_init(struct image *image,
 	if (id)
 		image->id = estrdup(id);
 	else
-		image->id = NULL;
+		image->id = tmp_id();
 
 	image->title = estrdup(title ? title : TMP_DEFAULT_TITLE);
 	image->author = estrdup(author ? author : TMP_DEFAULT_AUTHOR);
 	image->filename = estrdup(filename ? filename : TMP_DEFAULT_FILENAME);
-	image->data = estrdup(data);
+	image->data = ememdup(data, datasz);
+	image->datasz = datasz;
 	image->start = start;
 	image->end = end;
 }
@@ -73,14 +77,26 @@ image_dump(const struct image *image)
 {
 	assert(image);
 
-	return tmp_json("{ss ss ss ss sI sI}",
+	/* We need to encode image data. */
+	char *enc, *ret;
+	size_t encsz;
+
+	encsz = B64_ENCODE_LENGTH(image->datasz) + 8;
+	enc = ecalloc(encsz + 1, 1);
+
+	b64_encode(image->data, image->datasz, enc, encsz);
+
+	ret = tmp_json("{ss* ss* ss* ss sI sI}",
 		"id",           image->id,
 		"title",        image->title,
 		"author",       image->author,
-		"data",         image->data,
+		"data",         enc,
 		"start",        (json_int_t)image->start,
 		"end",          (json_int_t)image->end
 	);
+	free(enc);
+
+	return ret;
 }
 
 int
@@ -88,16 +104,18 @@ image_parse(struct image *image, const char *text, char *error, size_t errorsz)
 {
 	const char *title = NULL, *author = NULL, *filename = NULL, *data = NULL;
 	json_int_t start = 0, end = 0;
-	json_t *doc;
-	json_error_t err;
+	size_t datasz = 0, decsz;
+	json_t *doc = NULL;
+	json_error_t err = {};
 	int rv;
+	unsigned char *dec;
 
 	memset(image, 0, sizeof (*image));
 
-	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s s?I s?I}",
+	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s% s?I s?I}",
 		"title",        &title,
 		"author",       &author,
-		"data",         &data,
+		"data",         &data, &datasz,
 		"start",        &start,
 		"end",          &end
 	);
@@ -109,8 +127,24 @@ image_parse(struct image *image, const char *text, char *error, size_t errorsz)
 	if (check_duration(start, end, error, errorsz) < 0)
 		return -1;
 
-	image_init(image, NULL, title, author, filename, data, start, end);
+	/*
+	 * Allocate large enough bytes to decode data but get the real number
+	 * of bytes just after decoding.
+	 */
+	decsz = B64_DECODE_LENGTH(datasz) + 8;
+	dec = ecalloc(decsz, 1);
+	decsz = b64_decode(data, datasz, dec, decsz);
+
+	if (decsz == (size_t)-1) {
+		rv = -1;
+		bstrlcpy(error, strerror(errno), errorsz);
+	} else {
+		rv = 0;
+		image_init(image, NULL, title, author, filename, dec, decsz, start, end);
+	}
+
+	free(dec);
 	json_decref(doc);
 
-	return 0;
+	return rv;
 }

@@ -345,6 +345,14 @@ estrndup(const char *src, size_t n)
 }
 
 void *
+ememdup(const void *ptr, size_t n)
+{
+	assert(ptr);
+
+	return memcpy(emalloc(n, 1), ptr, n);
+}
+
+void *
 ereallocarray(void *old, size_t n, size_t w)
 {
 	void *ptr;

@@ -1,5 +1,5 @@
 /*
- * tmpupd.h -- tmpupd main files
+ * page-image.h -- page /image
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef TMPUPD_H
-#define TMPUPD_H
+#ifndef TMPUPD_PAGE_IMAGE
+#define TMPUPD_PAGE_IMAGE
 
-#include <time.h>
+struct kreq;
 
-struct db;
-enum db_mode;
+void
+page_image(struct kreq *r, const char * const *args);
 
-int
-tmpupd_open(struct db *, enum db_mode);
+void
+page_image_raw(struct kreq *r, const char * const *args);
 
-/**
- * Create a somewhat unique identifier as much as we can.
- *
- * \return a newly allocated identifier (to be free'd)
- */
-char *
-tmpupd_newid(void);
-
-const char *
-tmpupd_expiresin(time_t start, time_t end);
-
-int
-tmpupd_isimage(const char *data, size_t datasz);
-
-#endif /* !TMPUPD_H */
+#endif /* !TMPUPD_PAGE_IMAGE */

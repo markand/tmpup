@@ -25,6 +25,7 @@
 #include "sql/image-delete.h"
 #include "sql/image-get.h"
 #include "sql/image-recents.h"
+#include "sql/image-save.h"
 
 static void
 get(sqlite3_stmt *stmt, void *data)
@@ -32,13 +33,14 @@ get(sqlite3_stmt *stmt, void *data)
 	struct image *image = data;
 
 	image_init(image,
-		(const char *)sqlite3_column_text(stmt, 0),
 		(const char *)sqlite3_column_text(stmt, 1),
 		(const char *)sqlite3_column_text(stmt, 2),
 		(const char *)sqlite3_column_text(stmt, 3),
 		(const char *)sqlite3_column_text(stmt, 4),
-		(time_t)sqlite3_column_int64(stmt, 5),
-		(time_t)sqlite3_column_int64(stmt, 6)
+		(const unsigned char *)sqlite3_column_blob(stmt, 5),
+		(size_t)sqlite3_column_int64(stmt, 0),
+		(time_t)sqlite3_column_int64(stmt, 6),
+		(time_t)sqlite3_column_int64(stmt, 7)
 	);
 }
 
@@ -48,14 +50,14 @@ db_image_save(struct image *image, struct db *db)
 	assert(image);
 	assert(db);
 
-	return db_execf(db, "ssssstt",
-	    image->id,
-	    image->title,
-	    image->author,
-	    image->filename,
-	    image->data,
-	    image->start,
-	    image->end
+	return db_insert(db, (const char *)sql_image_save, "ssssbtt",
+		image->id,
+		image->title,
+		image->author,
+		image->filename,
+		image->data, image->datasz,
+		image->start,
+		image->end
 	);
 }
 

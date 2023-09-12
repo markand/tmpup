@@ -51,6 +51,8 @@ static int
 vbind(sqlite3_stmt *stmt, const char *fmt, va_list ap)
 {
 	int index = 1, status;
+	const void *blob;
+	size_t blobsz;
 
 	for (; *fmt; fmt++) {
 		status = 0;
@@ -58,6 +60,11 @@ vbind(sqlite3_stmt *stmt, const char *fmt, va_list ap)
 		switch (*fmt) {
 		case 'd':
 			sqlite3_bind_int(stmt, index++, va_arg(ap, int));
+			break;
+		case 'b':
+			blob = va_arg(ap, const void *);
+			blobsz = va_arg(ap, size_t);
+			sqlite3_bind_blob(stmt, index++, blob, blobsz, NULL);
 			break;
 		case 'f':
 			sqlite3_bind_double(stmt, index++, va_arg(ap, double));

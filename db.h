@@ -27,6 +27,7 @@
  * convenience. The following characters denotes which types must be passed:
  *
  * - `I`: `sqlite3_int64`
+ * - `b`: `const void *`, `size_t`
  * - `d`: `int`
  * - `f`: `double`
  * - `j`: `intmax_t`

@@ -194,6 +194,17 @@ char *
 estrndup(const char *str, size_t n);
 
 /**
+ * Wrap emalloc() + memcpy in one call.
+ *
+ * \pre ptr != NULL
+ * \param ptr the pointer to duplicate
+ * \param n the memory region size
+ * \return a non-NULL pointer that contains a copy of ptr
+ */
+void *
+ememdup(const void *ptr, size_t n);
+
+/**
  * Wrap breallocarray(3) and exit with code 1 in case of memory exhaustion.
  *
  * \note This function should be used only when memory failure is unrecoverable.

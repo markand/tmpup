@@ -14,7 +14,7 @@ create table if not exists `image`(
 	`title`         TEXT not NULL,
 	`author`        TEXT not NULL,
 	`filename`      TEXT not NULL,
-	`data`          TEXT not NULL,
+	`data`          BLOB not NULL,
 	`start`         INTEGER not NULL,
 	`end`           INTEGER not NULL
 ) STRICT;

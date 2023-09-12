@@ -22,7 +22,9 @@
 
 #include "http.h"
 #include "log.h"
+#include "page-api-v0-image.h"
 #include "page-api-v0-paste.h"
+#include "page-image.h"
 #include "page-index.h"
 #include "page-paste.h"
 #include "page.h"
@@ -40,9 +42,15 @@ struct page {
 };
 
 static struct page pages[] = {
-	GET  ("^/$",                    page_index),
-	POST ("^/api/v0/paste$",        page_api_v0_paste),
-	GET  ("^/paste/([a-z0-9]+)$",   page_paste),
+	GET  ("^/$",                            page_index),
+	GET  ("^/image/([a-z0-9]+)$",           page_image),
+	GET  ("^/paste/([a-z0-9]+)$",           page_paste),
+	GET  ("^/image/raw/([a-z0-9]+)$",       page_image_raw),
+#if 0
+	GET  ("^/paste/raw/([a-z0-9]+)$",       page_paste_raw),
+#endif
+	POST ("^/api/v0/image$",                page_api_v0_image),
+	POST ("^/api/v0/paste$",                page_api_v0_paste)
 };
 
 static inline char **

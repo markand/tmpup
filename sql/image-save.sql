@@ -1,4 +1,4 @@
-insert into `paste`(
+insert into `image`(
 	`id`,
 	`title`,
 	`author`,
