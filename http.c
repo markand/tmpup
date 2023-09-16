@@ -154,8 +154,6 @@ http_process(struct kreq *r)
 	struct page *page = NULL, *iter;
 	char **args;
 
-	printf("=> [%s]\n", r->fullpath);
-
 	for (size_t i = 0; i < LEN(pages); ++i) {
 		iter = &pages[i];
 
