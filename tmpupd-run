@@ -186,7 +186,6 @@ spawn_lighttpd()
 	        "check-local" => "disable"
 	    ))
 	)
-
 	EOF
 
 	echo "starting lighttpd on port $port"
@@ -195,7 +194,6 @@ spawn_lighttpd()
 
 # Spawn the webserver first.
 if ! $http_spawn; then
-	sleep 30
 	die "abort: unable to spawn HTTP server, exiting"
 fi
 
