@@ -27,8 +27,8 @@ die()
 cleanup()
 {
 	if [ -n "$wrkdir" ] && [ -d "$wrkdir" ]; then
-		if [ -f "$wrkdir/nginx/pid" ]; then
-			kill -TERM $(cat "$wrkdir/nginx/pid")
+		if [ -f "$wrkdir/httpd.pid" ]; then
+			kill -TERM $(cat "$wrkdir/httpd.pid")
 		fi
 
 		rm -rf "$wrkdir"
@@ -57,11 +57,15 @@ done
 if ! command -v kfcgi >/dev/null 2>&1; then
 	die "abort: kfcgi not found"
 fi
-if ! command -v nginx >/dev/null 2>&1; then
-	die "abort: nginx not found"
-fi
 if [ ! -x "$base/tmpupd" ]; then
 	die "abort: tmpupd not build"
+fi
+
+# Find a proper webserver to start
+if command -v nginx >/dev/null 2>&1; then
+	http_spawn=spawn_nginx
+elif command -v lighttpd >/dev/null 2>&1; then
+	http_spawn=spawn_lighttpd
 fi
 
 # Try to run command now as root depending on what is available.
@@ -82,76 +86,123 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Nginx needs lot of files...
-mkdir -p $wrkdir/nginx
+#
+# spawn_nginx
+#
+# Spawn the nginx webserver.
+#
+spawn_nginx()
+{
+	# Nginx needs lot of files...
+	mkdir -p $wrkdir/nginx
 
-# Create a nginx configuration.
-cat > "$wrkdir/nginx/conf" <<-EOF
-worker_processes 1;
-pid $wrkdir/nginx/pid;
-daemon on;
+	# Create a nginx configuration.
+	cat > "$wrkdir/nginx/conf" <<-EOF
+	worker_processes 1;
+	pid $wrkdir/httpd.pid;
+	daemon on;
 
-events {
-    worker_connections 16;
+	events {
+	    worker_connections 16;
+	}
+
+	http {
+	    log_format default '\$time_iso8601 \$status \$request';
+	    sendfile on;
+	    tcp_nopush on;
+	    keepalive_timeout 65;
+	    types_hash_max_size 4096;
+
+	    include /etc/nginx/mime.types;
+	    default_type application/octet-stream;
+
+	    # nginx please...
+	    client_body_temp_path $wrkdir/nginx;
+	    proxy_temp_path $wrkdir/nginx;
+	    fastcgi_temp_path $wrkdir/nginx;
+	    uwsgi_temp_path $wrkdir/nginx;
+	    scgi_temp_path $wrkdir/nginx;
+
+	    server {
+		server_name localhost;
+		listen $port;
+		access_log $wrkdir/nginx/access default;
+
+		location / {
+		    fastcgi_param QUERY_STRING      query_string;
+		    fastcgi_param REQUEST_METHOD    \$request_method;
+		    fastcgi_param CONTENT_TYPE      \$content_type;
+		    fastcgi_param CONTENT_LENGTH    \$content_length;
+		    fastcgi_param SCRIPT_FILENAME   \$document_root\$fastcgi_script_name;
+		    fastcgi_param SCRIPT_NAME       \$fastcgi_script_name;
+		    fastcgi_param PATH_INFO         \$document_uri;
+		    fastcgi_param PATH_TRANSLATED   \$document_root\$fastcgi_path_info;
+		    fastcgi_param REQUEST_URI       \$request_uri;
+		    fastcgi_param DOCUMENT_URI      \$document_uri;
+		    fastcgi_param DOCUMENT_ROOT     \$document_root;
+		    fastcgi_param SERVER_PROTOCOL   \$server_protocol;
+		    fastcgi_param GATEWAY_INTERFACE CGI/1.1;
+		    fastcgi_param SERVER_SOFTWARE   nginx/\$nginx_version;
+		    fastcgi_param REMOTE_ADDR       \$remote_addr;
+		    fastcgi_param REMOTE_PORT       \$remote_port;
+		    fastcgi_param SERVER_ADDR       \$server_addr;
+		    fastcgi_param SERVER_PORT       \$server_port;
+		    fastcgi_param SERVER_NAME       \$server_name;
+		    fastcgi_param HTTPS             \$https;
+		    fastcgi_pass                    unix:$wrkdir/httpd.sock;
+		}
+	    }
+	}
+	EOF
+
+	echo "starting nginx on port $port."
+	nginx -c "$wrkdir/nginx/conf" -e "$wrkdir/nginx/errors"
 }
 
-http {
-    log_format default '\$time_iso8601 \$status \$request';
-    sendfile on;
-    tcp_nopush on;
-    keepalive_timeout 65;
-    types_hash_max_size 4096;
+#
+# spawn_nginx
+#
+# Spawn the nginx webserver.
+#
+spawn_lighttpd()
+{
+	mkdir -p "$wrkdir/lighttpd"
 
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
+	cat > "$wrkdir/lighttpd/conf" <<-EOF
+	server.document-root = "$wrkdir"
+	server.port = "$port"
+	server.username = "$uid"
+	server.groupname = "$uid"
+	server.pid-file = "$wrkdir/httpd.pid"
+	server.errorlog = "$wrkdir/lighttpd/errors"
+	server.modules += ( "mod_accesslog", "mod_fastcgi" )
 
-    # nginx please...
-    client_body_temp_path $wrkdir/nginx;
-    proxy_temp_path $wrkdir/nginx;
-    fastcgi_temp_path $wrkdir/nginx;
-    uwsgi_temp_path $wrkdir/nginx;
-    scgi_temp_path $wrkdir/nginx;
+	accesslog.filename = "$wrkdir/lighttpd/access"
+	fastcgi.server = (
+	    "/" => ((
+	        "socket" => "$wrkdir/httpd.sock",
+	        "broken-scriptfilename" => "enable",
+	        "fix-root-scriptname" => "enable",
+	        "check-local" => "disable"
+	    ))
+	)
 
-    server {
-        server_name localhost;
-        listen $port;
-        access_log $wrkdir/nginx/access default;
+	EOF
 
-        location / {
-            fastcgi_param QUERY_STRING      query_string;
-            fastcgi_param REQUEST_METHOD    \$request_method;
-            fastcgi_param CONTENT_TYPE      \$content_type;
-            fastcgi_param CONTENT_LENGTH    \$content_length;
-            fastcgi_param SCRIPT_FILENAME   \$document_root\$fastcgi_script_name;
-            fastcgi_param SCRIPT_NAME       \$fastcgi_script_name;
-            fastcgi_param PATH_INFO         \$document_uri;
-            fastcgi_param PATH_TRANSLATED   \$document_root\$fastcgi_path_info;
-            fastcgi_param REQUEST_URI       \$request_uri;
-            fastcgi_param DOCUMENT_URI      \$document_uri;
-            fastcgi_param DOCUMENT_ROOT     \$document_root;
-            fastcgi_param SERVER_PROTOCOL   \$server_protocol;
-            fastcgi_param GATEWAY_INTERFACE CGI/1.1;
-            fastcgi_param SERVER_SOFTWARE   nginx/\$nginx_version;
-            fastcgi_param REMOTE_ADDR       \$remote_addr;
-            fastcgi_param REMOTE_PORT       \$remote_port;
-            fastcgi_param SERVER_ADDR       \$server_addr;
-            fastcgi_param SERVER_PORT       \$server_port;
-            fastcgi_param SERVER_NAME       \$server_name;
-            fastcgi_param HTTPS             \$https;
-            fastcgi_pass                    unix:$wrkdir/nginx/sock;
-        }
-    }
+	echo "starting lighttpd on port $port"
+	lighttpd -f "$wrkdir/lighttpd/conf"
 }
-EOF
 
-# First nginx.
-echo "starting nginx on port $port."
-nginx -c "$wrkdir/nginx/conf" -e "$wrkdir/nginx/errors"
+# Spawn the webserver first.
+if ! $http_spawn; then
+	sleep 30
+	die "abort: unable to spawn HTTP server, exiting"
+fi
 
 # Now kfcgi, needs root.
 echo "starting kfcgi."
 $sucmd kfcgi -p/ -d -n1 -N1  \
-	-s "$wrkdir/nginx/sock" \
+	-s "$wrkdir/httpd.sock" \
 	-u "$uid" \
 	-U "$uid" \
 	-- "$base/tmpupd" -vv -d $db
