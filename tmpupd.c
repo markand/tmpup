@@ -44,12 +44,11 @@
 #define TAG "tmpupd: "
 
 static const char *dbpath = VARDIR "/db/tmpup/tmpup.db";
+static sigset_t sigs;
 
 #if defined(WITH_MAGIC)
 static magic_t cookie;
 #endif
-
-static sigset_t sigs;
 
 static void
 prune(void)
@@ -105,7 +104,7 @@ init_signals(void)
 static inline void
 init_db(void)
 {
-	struct db db;
+	struct db db = {};
 
 	/*
 	 * Initialize at least once to get table populated since some pages
