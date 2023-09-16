@@ -22,11 +22,14 @@
 
 #include <magic.h>
 
+#include "check.h"
 #include "paste.h"
 #include "tmp.h"
 #include "util.h"
 
+#if defined(WITH_MAGIC)
 static magic_t cookie;
+#endif
 
 static int
 cmp_str(const void *key, const void *val)
@@ -34,11 +37,19 @@ cmp_str(const void *key, const void *val)
 	return strcmp(key, *(const char **)val);
 }
 
-void
+int
 check_init(void)
 {
-	if (!(cookie = magic_open(MAGIC_SYMLINK | MAGIC_MIME)))
+	int rv = 0;
 
+#if defined(WITH_MAGIC)
+	if (!(cookie = magic_open(MAGIC_SYMLINK | MAGIC_MIME_TYPE)))
+		return -1;
+	if (magic_load(cookie, NULL) < 0)
+		return -1;
+#endif
+
+	return rv;
 }
 
 int
@@ -79,7 +90,46 @@ check_duration(time_t start, time_t end, char *error, size_t errorsz)
 	return 0;
 }
 
+int
+check_image(const void *data, size_t datasz)
+{
+#if defined(WITH_MAGIC)
+	assert(data);
+
+	static const char * const mimes[] = {
+		"image/png",
+		"image/jpeg"
+	};
+	const char *rv;
+
+	/* No cookie? assume yes as last resort. */
+	if (!cookie)
+		return 0;
+
+	if (!(rv = magic_buffer(cookie, data, datasz))) {
+		log_warn(TAG "magic_buffer: %s", magic_error(cookie));
+		return 0;
+	}
+
+	for (size_t i = 0; i < LEN(mimes); ++i)
+		if (strcmp(rv, mimes[i]) == 0)
+			return 0;
+
+	return -1;
+#else
+	/* No libmagic, accept everything. */
+	(void)data;
+	(void)datasz;
+
+	return 1;
+#endif
+}
+
 void
 check_finish(void)
 {
+#if defined(WITH_MAGIC)
+	if (cookie)
+		magic_close(cookie);
+#endif
 }

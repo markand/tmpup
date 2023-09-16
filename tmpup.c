@@ -151,10 +151,17 @@ cmd_image(int argc, char **argv)
 	struct image image;
 	struct req req;
 	const char *id;
-	char *contents = NULL, *dump;
+	char *contents = NULL, *dump, *slash;
 	size_t contentsz = 0;
 
 	readall(argc >= 2 ? argv[1] : NULL, &contents, &contentsz);
+
+	if (argc >= 2) {
+		if ((slash = strrchr(argv[1], '/')))
+			filename = slash + 1;
+		else
+			filename = argv[1];
+	}
 
 	image_init(&image, NULL, title, author, filename,
 	    (const unsigned char *)contents, contentsz, start, end);

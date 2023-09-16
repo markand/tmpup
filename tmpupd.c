@@ -28,6 +28,7 @@
 #       include <magic.h>
 #endif
 
+#include "check.h"
 #include "db.h"
 #include "http.h"
 #include "log.h"
@@ -41,7 +42,10 @@
 #define TAG "tmpupd: "
 
 static const char *dbpath = VARDIR "/db/tmpup/tmpup.db";
+
+#if defined(WITH_MAGIC)
 static magic_t cookie;
+#endif
 
 static void
 stop(int n)
@@ -59,7 +63,7 @@ stop(int n)
 static inline void
 init_signals(void)
 {
-	struct sigaction sa = {0};
+	struct sigaction sa = {};
 
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
@@ -95,32 +99,12 @@ static inline void
 init_misc(void)
 {
 	srandom(time(NULL));
-}
 
-static void
-init_magic(void)
-{
-#if defined(WITH_MAGIC)
-	int rv = 1;
-
-	if (!(cookie = magic_open(MAGIC_SYMLINK | MAGIC_MIME_TYPE))) {
-		log_warn(TAG "magic_open: %s", strerror(errno));
-		rv = 0;
-	}
-	if (rv == 1 && magic_load(cookie, NULL) < 0) {
-		log_warn(TAG "magic_load: %s", magic_error(cookie));
-		rv = 0;
-	}
-
-	if (rv == 0) {
-		log_warn(TAG "image check disabled");
-
-		if (cookie) {
-			magic_close(cookie);
-			cookie = NULL;
-		}
-	}
-#endif
+	if (check_init() < 0) {
+		log_warn(TAG "libmagic initialization error: %s", strerror(errno));
+		log_warn(TAG "image verification will be disabled");
+	} else
+		log_debug(TAG "image verification enabled");
 }
 
 static inline void
@@ -137,7 +121,6 @@ init(enum log_level level)
 	init_db();
 	init_logs(level);
 	init_misc();
-	init_magic();
 	init_tmpupd();
 }
 
@@ -168,11 +151,7 @@ finish(void)
 	http_finish();
 	maint_finish();
 	log_finish();
-
-#if defined(WITH_MAGIC)
-	if (cookie)
-		magic_close(cookie);
-#endif
+	check_finish();
 }
 
 int
@@ -202,41 +181,6 @@ tmpupd_expiresin(time_t start, time_t end)
 		sprintf(ret, "%llu days", gap / TMP_DURATION_DAY);
 
 	return ret;
-}
-
-int
-tmpupd_isimage(const char *data, size_t datasz)
-{
-#if defined(WITH_MAGIC)
-	assert(data);
-
-	static const char * const mimes[] = {
-		"image/png",
-		"image/jpeg"
-	};
-	const char *rv;
-
-	/* No cookie? assume yes as last resort. */
-	if (!cookie)
-		return 1;
-
-	if (!(rv = magic_buffer(cookie, data, datasz))) {
-		log_warn(TAG "magic_buffer: %s", magic_error(cookie));
-		return 1;
-	}
-
-	for (size_t i = 0; i < LEN(mimes); ++i)
-		if (strcmp(rv, mimes[i]) == 0)
-			return 1;
-
-	return 0;
-#else
-	/* No libmagic, accept everything. */
-	(void)data;
-	(void)datasz;
-
-	return 1;
-#endif
 }
 
 int

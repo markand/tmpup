@@ -86,10 +86,11 @@ image_dump(const struct image *image)
 
 	b64_encode(image->data, image->datasz, enc, encsz);
 
-	ret = tmp_json("{ss* ss* ss* ss sI sI}",
+	ret = tmp_json("{ss* ss* ss* ss* ss sI sI}",
 		"id",           image->id,
 		"title",        image->title,
 		"author",       image->author,
+		"filename",     image->filename,
 		"data",         enc,
 		"start",        (json_int_t)image->start,
 		"end",          (json_int_t)image->end
@@ -112,9 +113,10 @@ image_parse(struct image *image, const char *text, char *error, size_t errorsz)
 
 	memset(image, 0, sizeof (*image));
 
-	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s% s?I s?I}",
+	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s s?s% s?I s?I}",
 		"title",        &title,
 		"author",       &author,
+		"filename",     &filename,
 		"data",         &data, &datasz,
 		"start",        &start,
 		"end",          &end

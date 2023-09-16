@@ -16,6 +16,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+PREFIX :=       /usr/local
+VARDIR :=       $(PREFIX)/var
+
 CC :=           clang
 CFLAGS :=       -g -O0 -Wall -Wextra
 
@@ -32,11 +35,13 @@ SQL_OBJS :=     $(SQL_SRCS:.sql=.h)
 
 HTML_SRCS :=    html/footer.html
 HTML_SRCS +=    html/header.html
+HTML_SRCS +=    html/image.html
 HTML_SRCS +=    html/index.html
 HTML_SRCS +=    html/paste.html
 HTML_OBJS :=    $(HTML_SRCS:.html=.h)
 
 TMPUPD_SRCS :=  extern/libsqlite/sqlite3.c
+TMPUPD_SRCS +=  base64.c
 TMPUPD_SRCS +=  check.c
 TMPUPD_SRCS +=  db-image.c
 TMPUPD_SRCS +=  db-paste.c
@@ -45,8 +50,9 @@ TMPUPD_SRCS +=  http.c
 TMPUPD_SRCS +=  image.c
 TMPUPD_SRCS +=  log.c
 TMPUPD_SRCS +=  maint.c
-TMPUPD_SRCS +=  page-api-v0-paste.c
 TMPUPD_SRCS +=  page-api-v0-image.c
+TMPUPD_SRCS +=  page-api-v0-paste.c
+TMPUPD_SRCS +=  page-image.c
 TMPUPD_SRCS +=  page-index.c
 TMPUPD_SRCS +=  page-paste.c
 TMPUPD_SRCS +=  page.c
@@ -57,7 +63,7 @@ TMPUPD_SRCS +=  util.c
 TMPUPD_OBJS :=  $(TMPUPD_SRCS:.c=.o)
 TMPUPD_DEPS :=  $(TMPUPD_SRCS:.c=.d)
 
-TMPUP_SRCS :=   check.c image.c paste.c tmp.c tmpup.c util.c
+TMPUP_SRCS :=   base64.c check.c image.c paste.c tmp.c tmpup.c util.c
 TMPUP_OBJS :=   $(TMPUP_SRCS:.c=.o)
 TMPUP_DEPS :=   $(TMPUP_SRCS:.c=.d)
 
@@ -73,6 +79,7 @@ KCGI_LIBS :=    $(shell pkg-config --libs kcgi kcgi-html)
 MAGIC_INCS :=   $(shell pkg-config --cflags libmagic)
 MAGIC_LIBS :=   $(shell pkg-config --libs libmagic)
 
+override CPPFLAGS += -DVARDIR=\"$(VARDIR)\"
 override CPPFLAGS += -DSQLITE_DEFAULT_FOREIGN_KEYS=1
 override CPPFLAGS += -DSQLITE_DEFAULT_MEMSTATUS=0
 override CPPFLAGS += -DSQLITE_OMIT_DECLTYPE

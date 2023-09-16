@@ -65,7 +65,14 @@ struct image {
 	 *
 	 * Image content uncompressed as-is.
 	 */
-	char *data;
+	unsigned char *data;
+
+	/**
+	 * (read-write)
+	 *
+	 * Image length.
+	 */
+	size_t datasz;
 
 	/**
 	 * (read-write)
@@ -96,6 +103,7 @@ struct image {
  * \param author optional author
  * \param filename optional filename
  * \param data the image file content
+ * \param datasz image content length
  * \param start image creation date
  * \param end image expiration date
  */
@@ -105,7 +113,8 @@ image_init(struct image *image,
            const char *title,
            const char *author,
            const char *filename,
-           const char *data,
+           const unsigned char *data,
+           size_t datasz,
            time_t start,
            time_t end);
 

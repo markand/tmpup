@@ -129,7 +129,7 @@ format_images(struct self *self)
 		/* id */
 		khtml_elem(&self->html, KELEM_TD);
 		khtml_attr(&self->html, KELEM_A,
-		    KATTR_HREF, url("paste/%s", img->id),
+		    KATTR_HREF, url("image/%s", img->id),
 		    KATTR__MAX);
 		khtml_printf(&self->html, "%s", img->id);
 		khtml_closeelem(&self->html, 2);
