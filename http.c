@@ -17,8 +17,11 @@
  */
 
 #include <assert.h>
-#include <stdlib.h>
+#include <pthread.h>
 #include <regex.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "http.h"
 #include "log.h"
@@ -53,6 +56,8 @@ static struct page pages[] = {
 	POST ("^/api/v0/paste$",                page_api_v0_paste)
 };
 
+static pthread_t thread;
+
 static inline char **
 makeargs(const char *path, const regmatch_t *matches, size_t len)
 {
@@ -80,6 +85,45 @@ freeargs(char **list)
 	free(list);
 }
 
+static void *
+routine(void *data)
+{
+	(void)data;
+
+	struct kfcgi *fcgi;
+	struct kreq req;
+	int run = 1;
+
+	if (khttp_fcgi_init(&fcgi, NULL, 0, NULL, 0, 0) != KCGI_OK)
+		die("abort: could not allocate FastCGI");
+
+	while (run) {
+		/* TODO: check return code. */
+		switch (khttp_fcgi_parse(fcgi, &req)) {
+		case KCGI_OK:
+			http_process(&req);
+			khttp_free(&req);
+			break;
+		case KCGI_EXIT:
+			/* This is received from the main thread. */
+			run = 0;
+			break;
+		default:
+			/*
+			 * Other error, break the loop and send SIGINT to main
+			 * thread to stop the whole application.
+			 */
+			raise(SIGINT);
+			run = 0;
+			break;
+		}
+	}
+
+	khttp_fcgi_free(fcgi);
+
+	return NULL;
+}
+
 void
 http_init(void)
 {
@@ -96,6 +140,9 @@ http_init(void)
 			die("abort: regex failed: %s\n", errstr);
 		}
 	}
+
+	if ((rv = pthread_create(&thread, NULL, routine, NULL)) != 0)
+		die("abort: pthread_create: %s\n", strerror(rv));
 }
 
 void
@@ -103,9 +150,11 @@ http_process(struct kreq *r)
 {
 	assert(r);
 
-	regmatch_t matches[8] = {0};
+	regmatch_t matches[8] = {};
 	struct page *page = NULL, *iter;
 	char **args;
+
+	printf("=> [%s]\n", r->fullpath);
 
 	for (size_t i = 0; i < LEN(pages); ++i) {
 		iter = &pages[i];
@@ -132,4 +181,6 @@ http_finish(void)
 {
 	for (size_t i = 0; i < LEN(pages); ++i)
 		regfree(&pages[i].regex);
+
+	pthread_join(thread, NULL);
 }

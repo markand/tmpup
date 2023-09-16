@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sys/time.h>
 #include <assert.h>
 #include <errno.h>
 #include <signal.h>
@@ -29,10 +30,11 @@
 #endif
 
 #include "check.h"
+#include "db-image.h"
+#include "db-paste.h"
 #include "db.h"
 #include "http.h"
 #include "log.h"
-#include "maint.h"
 #include "tmp.h"
 #include "tmpupd.h"
 #include "util.h"
@@ -47,30 +49,57 @@ static const char *dbpath = VARDIR "/db/tmpup/tmpup.db";
 static magic_t cookie;
 #endif
 
-static void
-stop(int n)
-{
-	(void)n;
+static sigset_t sigs;
 
-	/*
-	 * To terminate kcgi loop we have to kill ourselves using SIGTERM. It
-	 * will automatically triggers an error of EINTR at the moment but do
-	 * it in the case this is fixed at some point.
-	 */
-	kill(getpid(), SIGTERM);
+static void
+prune(void)
+{
+	struct db db = {};
+
+	if (tmpupd_open(&db, DB_RDWR) < 0) {
+		log_warn(TAG "skipping");
+		return;
+	}
+
+	log_debug(TAG "pruning pastes...");
+
+	if (db_paste_prune(&db) < 0)
+		log_warn(TAG "unable to prune pastes: %s", db.error);
+
+	log_debug(TAG "pruning images...");
+
+	if (db_image_prune(&db) < 0)
+		log_warn(TAG "unable to prune images: %s", db.error);
+
+	db_finish(&db);
 }
 
 static inline void
 init_signals(void)
 {
-	struct sigaction sa = {};
+	struct itimerval ts = {};
 
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-	sa.sa_handler = stop;
+	/*
+	 * Block the following signals:
+	 *
+	 * SIGINT: stop the application
+	 * SIGALRM: periodic cleanup routine
+	 */
+	sigemptyset(&sigs);
+	sigaddset(&sigs, SIGINT);
+	sigaddset(&sigs, SIGALRM);
 
-	if (sigaction(SIGINT, &sa, NULL) < 0)
-		die("abort: %s\n", strerror(errno));
+	pthread_sigmask(SIG_BLOCK, &sigs, NULL);
+
+	/*
+	 * Setup the periodic timer for cleaning outdated elements in the
+	 * database.
+	 */
+	ts.it_value.tv_sec = 5;
+	ts.it_interval.tv_sec = 5;
+
+	if (setitimer(ITIMER_REAL, &ts, NULL) < 0)
+		die("abort: setitimer: %s\n", strerror(errno));
 }
 
 static inline void
@@ -111,7 +140,6 @@ static inline void
 init_tmpupd(void)
 {
 	http_init();
-	maint_init();
 }
 
 static void
@@ -127,21 +155,31 @@ init(enum log_level level)
 static void
 loop(void)
 {
-	struct kfcgi *fcgi;
-	struct kreq req;
+	int n, run = 1;
 
-	if (khttp_fcgi_init(&fcgi, NULL, 0, NULL, 0, 0) != KCGI_OK)
-		die("abort: could not allocate FastCGI");
-
-	for (;;) {
-		if (khttp_fcgi_parse(fcgi, &req) != KCGI_OK)
+	while (run) {
+		if (sigwait(&sigs, &n) < 0) {
+			log_warn(TAG "sigwait: %s", strerror(errno));
 			break;
+		}
 
-		http_process(&req);
-		khttp_free(&req);
+		switch (n) {
+		case SIGINT:
+			/*
+			 * Raise SIGTERM to use to quit the program, it will
+			 * effectively stop the kcgi loop and thread.
+			 */
+			log_info(TAG "exiting on signal %d", n);
+			raise(SIGTERM);
+			run = 0;
+			break;
+		case SIGALRM:
+			prune();
+			break;
+		default:
+			break;
+		}
 	}
-
-	khttp_fcgi_free(fcgi);
 }
 
 static void
@@ -149,7 +187,6 @@ finish(void)
 {
 	log_info("tmpupd: exiting...");
 	http_finish();
-	maint_finish();
 	log_finish();
 	check_finish();
 }

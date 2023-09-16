@@ -51,7 +51,6 @@ TMPUPD_SRCS +=  db.c
 TMPUPD_SRCS +=  http.c
 TMPUPD_SRCS +=  image.c
 TMPUPD_SRCS +=  log.c
-TMPUPD_SRCS +=  maint.c
 TMPUPD_SRCS +=  page-api-v0-image.c
 TMPUPD_SRCS +=  page-api-v0-paste.c
 TMPUPD_SRCS +=  page-image.c
@@ -112,8 +111,12 @@ extern/libsqlite/sqlite3.o: private CPPFLAGS += -Wno-unused-parameter
 $(TMPUPD_SRCS): $(HTML_OBJS) $(SQL_OBJS)
 $(TMPUPD_OBJS): private CFLAGS += $(JANSSON_INCS) $(KCGI_INCS) $(MAGIC_INCS)
 
-tmpupd: private LDLIBS += $(JANSSON_LIBS) $(KCGI_LIBS) $(MAGIC_LIBS)
+tmpupd: private LDLIBS += $(JANSSON_LIBS) $(KCGI_LIBS) $(MAGIC_LIBS) -lpthread
 tmpupd: $(TMPUPD_OBJS)
+
+# convenient spawner
+tmpupd-run: tmpupd
+	sh tmpupd-run
 
 # tmpup
 
@@ -130,4 +133,4 @@ clean:
 	rm -f tmpupd $(TMPUPD_OBJS) $(TMPUPD_DEPS)
 	rm -f tmpup $(TMPUP_OBJS) $(TMPUP_DEPS)
 
-.PHONY: all clean
+.PHONY: all clean tmpupd-run
