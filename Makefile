@@ -24,11 +24,13 @@ CFLAGS :=       -g -O0 -Wall -Wextra
 
 SQL_SRCS :=     sql/image-delete.sql
 SQL_SRCS +=     sql/image-get.sql
+SQL_SRCS +=     sql/image-prune.sql
 SQL_SRCS +=     sql/image-recents.sql
 SQL_SRCS +=     sql/image-save.sql
 SQL_SRCS +=     sql/init.sql
 SQL_SRCS +=     sql/paste-delete.sql
 SQL_SRCS +=     sql/paste-get.sql
+SQL_SRCS +=     sql/paste-prune.sql
 SQL_SRCS +=     sql/paste-recents.sql
 SQL_SRCS +=     sql/paste-save.sql
 SQL_OBJS :=     $(SQL_SRCS:.sql=.h)

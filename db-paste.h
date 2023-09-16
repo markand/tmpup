@@ -79,4 +79,14 @@ db_paste_recents(struct paste *pastes, size_t pastesz, struct db *db);
 int
 db_paste_delete(struct paste *paste, struct db *db);
 
+/**
+ * Delete outdated pastes from database.
+ *
+ * \pre db != NULL
+ * \param db the database
+ * \return 0 on success or -1 on error
+ */
+int
+db_paste_prune(struct db *db);
+
 #endif /* TMPUPD_DB_PASTE_H */

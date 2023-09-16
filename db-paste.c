@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <time.h>
 
 #include "db-paste.h"
 #include "db.h"
@@ -25,6 +26,7 @@
 
 #include "sql/paste-delete.h"
 #include "sql/paste-get.h"
+#include "sql/paste-prune.h"
 #include "sql/paste-recents.h"
 #include "sql/paste-save.h"
 
@@ -103,4 +105,12 @@ db_paste_delete(struct paste *paste, struct db *db)
 	assert(db);
 
 	return db_execf(db, (const char *)sql_paste_delete, "s", paste->id);
+}
+
+int
+db_paste_prune(struct db *db)
+{
+	assert(db);
+
+	return db_execf(db, (const char *)sql_paste_prune, "t", time(NULL));
 }

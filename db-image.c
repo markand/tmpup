@@ -26,6 +26,7 @@
 #include "sql/image-get.h"
 #include "sql/image-recents.h"
 #include "sql/image-save.h"
+#include "sql/image-prune.h"
 
 static void
 get(sqlite3_stmt *stmt, void *data)
@@ -100,4 +101,12 @@ db_image_delete(struct image *image, struct db *db)
 	assert(image);
 
 	return db_execf(db, (const char *)sql_image_delete, "s", image->id);
+}
+
+int
+db_image_prune(struct db *db)
+{
+	assert(db);
+
+	return db_execf(db, (const char *)sql_image_prune, "t", time(NULL));
 }

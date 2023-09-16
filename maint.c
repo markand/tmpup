@@ -23,8 +23,15 @@
 #include <string.h>
 #include <time.h>
 
+#include "db-image.h"
+#include "db-paste.h"
+#include "db.h"
+#include "log.h"
 #include "maint.h"
 #include "util.h"
+#include "tmpupd.h"
+
+#define TAG "maint: "
 
 static timer_t timer;
 static atomic_int run;
@@ -34,22 +41,40 @@ task(union sigval v)
 {
 	(void)v;
 
+	struct db db = {};
+
 	/* Do nothing if the task is spawned but we are quitting. */
 	if (!run)
 		return;
+	if (tmpupd_open(&db, DB_RDWR) < 0) {
+		log_warn(TAG "skipping");
+		return;
+	}
+
+	log_debug(TAG "pruning pastes...");
+
+	if (db_paste_prune(&db) < 0)
+		log_warn(TAG "unable to prune pastes: %s", db.error);
+
+	log_debug(TAG "pruning images...");
+
+	if (db_image_prune(&db) < 0)
+		log_warn(TAG "unable to prune images: %s", db.error);
+
+	db_finish(&db);
 }
 
 void
 maint_init(void)
 {
-	struct sigevent sev = {0};
-	struct itimerspec its = {0};
+	struct sigevent sev = {};
+	struct itimerspec its = {};
 
 	sev.sigev_notify = SIGEV_THREAD;
 	sev.sigev_notify_function = task;
 
-	its.it_value.tv_sec = 1;
-	its.it_interval.tv_sec = 1;
+	its.it_value.tv_sec = 5;
+	its.it_interval.tv_sec = 5;
 
 	run = 1;
 

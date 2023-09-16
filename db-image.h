@@ -79,4 +79,14 @@ db_image_recents(struct image *imgs, size_t imgsz, struct db *db);
 int
 db_image_delete(struct image *img, struct db *db);
 
+/**
+ * Delete outdated images from database.
+ *
+ * \pre db != NULL
+ * \param db the database
+ * \return 0 on success or -1 on error
+ */
+int
+db_image_prune(struct db *db);
+
 #endif /* TMPUPD_DB_IMAGE_H */
