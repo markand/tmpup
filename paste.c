@@ -278,9 +278,10 @@ paste_parse(struct paste *paste, const char *text, char *error, size_t errorsz)
 
 	memset(paste, 0, sizeof (*paste));
 
-	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s s?s s?I s?I}",
+	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s s?s s?s s?I s?I}",
 		"title",        &title,
 		"author",       &author,
+		"filename",     &filename,
 		"language",     &language,
 		"code",         &code,
 		"start",        &start,

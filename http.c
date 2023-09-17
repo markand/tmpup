@@ -48,6 +48,7 @@ static struct page pages[] = {
 	GET  ("^/$",                            page_index),
 	GET  ("^/image/([a-z0-9]+)$",           page_image),
 	GET  ("^/paste/([a-z0-9]+)$",           page_paste),
+	GET  ("^/paste/raw/([a-z0-9]+)$",       page_paste_raw),
 	GET  ("^/image/raw/([a-z0-9]+)$",       page_image_raw),
 #if 0
 	GET  ("^/paste/raw/([a-z0-9]+)$",       page_paste_raw),

@@ -17,6 +17,7 @@
  */
 
 #include <assert.h>
+#include <string.h>
 
 #include "db-paste.h"
 #include "db.h"
@@ -83,6 +84,23 @@ format(size_t index, void *data)
 	return 1;
 }
 
+static int
+find(struct paste *paste, const char *id)
+{
+	struct db db = {};
+	int rv;
+
+	log_debug(TAG "searching paste '%s'", id);
+
+	if (tmpupd_open(&db, DB_RDONLY) < 0)
+		return -1;
+
+	rv = db_paste_get(paste, id, &db);
+	db_finish(&db);
+
+	return rv;
+}
+
 static void
 get(struct kreq *r, const char * const *args)
 {
@@ -121,6 +139,32 @@ get(struct kreq *r, const char * const *args)
 }
 
 static void
+get_raw(struct kreq *r, const char * const *args)
+{
+	struct paste paste = {};
+
+	switch (find(&paste, args[0])) {
+	case 1:
+		khttp_head(r, kresps[KRESP_CONTENT_TYPE], "%s", kmimetypes[KMIME_APP_OCTET_STREAM]);
+		khttp_head(r, kresps[KRESP_CONTENT_LENGTH], "%zu", strlen(paste.code));
+		khttp_head(r, kresps[KRESP_CONNECTION], "keep-alive");
+		khttp_head(r, kresps[KRESP_CONTENT_DISPOSITION],
+		    "attachment; filename=\"%s\"", paste.filename);
+		khttp_body(r);
+		khttp_printf(r, "%s", paste.code);
+		break;
+	case 0:
+		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
+		break;
+	default:
+		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
+		break;
+	}
+
+	paste_finish(&paste);
+}
+
+static void
 post(struct kreq *r)
 {
 	struct db db;
@@ -145,6 +189,21 @@ page_paste(struct kreq *r, const char * const *args)
 		break;
 	case KMETHOD_POST:
 		post(r);
+		break;
+	default:
+		break;
+	}
+}
+
+void
+page_paste_raw(struct kreq *r, const char * const *args)
+{
+	assert(r);
+	assert(args);
+
+	switch (r->method) {
+	case KMETHOD_GET:
+		get_raw(r, args);
 		break;
 	default:
 		break;
