@@ -125,7 +125,7 @@ get(struct kreq *r, const char * const *args)
 }
 
 static void
-get_raw(struct kreq *r, const char * const *args)
+get_download(struct kreq *r, const char * const *args)
 {
 	struct image image = {};
 
@@ -182,14 +182,14 @@ page_image(struct kreq *r, const char * const *args)
 }
 
 void
-page_image_raw(struct kreq *r, const char * const *args)
+page_image_download(struct kreq *r, const char * const *args)
 {
 	assert(r);
 	assert(args);
 
 	switch (r->method) {
 	case KMETHOD_GET:
-		get_raw(r, args);
+		get_download(r, args);
 		break;
 	default:
 		break;

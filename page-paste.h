@@ -20,11 +20,18 @@
 #define TMPUPD_PAGE_PASTE
 
 struct kreq;
+struct paste;
 
 void
 page_paste(struct kreq *r, const char * const *args);
 
 void
+page_paste_download(struct kreq *r, const char * const *args);
+
+void
 page_paste_raw(struct kreq *r, const char * const *args);
+
+void
+page_paste_new(struct kreq *r, const char * const *args);
 
 #endif /* !TMPUPD_PAGE_PASTE */

@@ -219,7 +219,6 @@ paste_init(struct paste *paste,
            time_t end)
 {
 	assert(paste);
-	assert(code);
 
 	memset(paste, 0, sizeof (*paste));
 
@@ -232,7 +231,7 @@ paste_init(struct paste *paste,
 	paste->author = estrdup(author ? author : TMP_DEFAULT_AUTHOR);
 	paste->filename = estrdup(filename ? filename : TMP_DEFAULT_FILENAME);
 	paste->language = estrdup(language ? language : TMP_DEFAULT_LANG);
-	paste->code = estrdup(code);
+	paste->code = estrdup(code ? code : TMP_DEFAULT_CODE);
 	paste->start = start;
 	paste->end = end;
 }

@@ -39,6 +39,7 @@ HTML_SRCS :=    html/footer.html
 HTML_SRCS +=    html/header.html
 HTML_SRCS +=    html/image.html
 HTML_SRCS +=    html/index.html
+HTML_SRCS +=    html/paste-new.html
 HTML_SRCS +=    html/paste.html
 HTML_OBJS :=    $(HTML_SRCS:.html=.h)
 

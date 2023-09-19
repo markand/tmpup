@@ -219,6 +219,25 @@ tmpupd_expiresin(time_t start, time_t end)
 	return ret;
 }
 
+void
+tmpupd_condamn(time_t *start, time_t *end, const char *duration)
+{
+	assert(start);
+	assert(end);
+	assert(duration);
+
+	*start = *end = time(NULL);
+
+	if (strcmp(duration, "day") == 0)
+		*end += TMP_DURATION_DAY;
+	else if (strcmp(duration, "week") == 0)
+		*end += TMP_DURATION_WEEK;
+	else if (strcmp(duration, "month") == 0)
+		*end += TMP_DURATION_MONTH;
+	else
+		*end += TMP_DURATION_HOUR;
+}
+
 int
 main(int argc, char **argv)
 {

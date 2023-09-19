@@ -25,6 +25,6 @@ void
 page_image(struct kreq *r, const char * const *args);
 
 void
-page_image_raw(struct kreq *r, const char * const *args);
+page_image_download(struct kreq *r, const char * const *args);
 
 #endif /* !TMPUPD_PAGE_IMAGE */

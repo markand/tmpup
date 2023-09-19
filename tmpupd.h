@@ -41,4 +41,7 @@ tmpupd_expiresin(time_t start, time_t end);
 int
 tmpupd_isimage(const char *data, size_t datasz);
 
+void
+tmpupd_condamn(time_t *start, time_t *end, const char *duration);
+
 #endif /* !TMPUPD_H */

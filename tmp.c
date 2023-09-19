@@ -24,6 +24,14 @@
 #include "tmp.h"
 #include "util.h"
 
+const char * const tmp_durations[] = {
+	"day",
+	"hour",
+	"week",
+	"month"
+};
+size_t tmp_durationsz = LEN(tmp_durations);
+
 char *
 tmp_id(void)
 {

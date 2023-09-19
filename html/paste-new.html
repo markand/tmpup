@@ -1,0 +1,27 @@
+<form method="POST" action="/paste/new">
+	<label for="title">Title</label><br>
+	<input id="title" name="title" type="text" value="@@title@@" placeholder="@@default-title@@"><br>
+
+	<label for="author">Author</label><br>
+	<input id="author" name="author" type="text" value="@@author@@" placeholder="@@default-author@@"><br>
+
+	<label>Filename</label><br>
+	<input name="filename" type="text" value="@@filename@@" placeholder="@@default-filename@@"><br>
+
+	<label>Duration</label><br>
+	<select name="duration">
+		@@durations@@
+	</select><br>
+
+	<label>Language</label><br>
+	<select name="language">
+		@@languages@@
+	</select><br>
+
+	<label>Content</label><br>
+	<textarea name="code" placeholder="@@default-code@@">
+		@@code@@
+	</textarea><br>
+
+	<input type="submit" value="Create">
+</form>
