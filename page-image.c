@@ -88,7 +88,8 @@ format(size_t index, void *data)
 		break;
 	case KW_EXPIRES:
 		if (self->image)
-			khtml_printf(&self->html, "%s", tmpupd_expiresin(self->image->start, self->image->end));
+			khtml_printf(&self->html, "%s",
+			    tmpupd_expiresin(self->image->start, self->image->end));
 		break;
 	case KW_ID:
 		if (self->image)
@@ -110,8 +111,6 @@ find(struct image *img, const char *id)
 {
 	struct db db;
 	int rv;
-
-	log_debug(TAG "searching image '%s'", id);
 
 	if (tmpupd_open(&db, DB_RDONLY) < 0)
 		return -1;
@@ -264,6 +263,7 @@ page_image(struct kreq *r, const char * const *args)
 		post(r);
 		break;
 	default:
+		page_status(r, 400, KMIME_TEXT_HTML);
 		break;
 	}
 }
@@ -279,6 +279,7 @@ page_image_download(struct kreq *r, const char * const *args)
 		get_download(r, args);
 		break;
 	default:
+		page_status(r, 400, KMIME_TEXT_HTML);
 		break;
 	}
 }

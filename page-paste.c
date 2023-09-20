@@ -117,7 +117,8 @@ format(size_t index, void *data)
 		break;
 	case KW_EXPIRES:
 		if (self->paste)
-			khtml_printf(&self->html, "%s", tmpupd_expiresin(self->paste->start, self->paste->end));
+			khtml_printf(&self->html, "%s",
+			    tmpupd_expiresin(self->paste->start, self->paste->end));
 		break;
 	case KW_ID:
 		if (self->paste)
@@ -281,8 +282,8 @@ get_new(struct kreq *r, const char * const *args)
 static void
 post(struct kreq *r)
 {
-	struct db db = {};
-	struct paste paste = {};
+	struct db db;
+	struct paste paste;
 	const char *title = NULL,
 	           *author = NULL,
 	           *filename = NULL,
