@@ -70,7 +70,7 @@ page_static(struct kreq *r, const char * const *args)
 		get(r, args[0]);
 		break;
 	default:
-		page_status(r, 400, KMIME_TEXT_HTML);
+		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
 		break;
 	}
 }

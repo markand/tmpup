@@ -263,7 +263,7 @@ page_image(struct kreq *r, const char * const *args)
 		post(r);
 		break;
 	default:
-		page_status(r, 400, KMIME_TEXT_HTML);
+		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
 		break;
 	}
 }
@@ -279,7 +279,7 @@ page_image_download(struct kreq *r, const char * const *args)
 		get_download(r, args);
 		break;
 	default:
-		page_status(r, 400, KMIME_TEXT_HTML);
+		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
 		break;
 	}
 }
@@ -298,7 +298,7 @@ page_image_new(struct kreq *r, const char * const *args)
 		post(r);
 		break;
 	default:
-		page_status(r, 400, KMIME_TEXT_HTML);
+		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
 		break;
 	}
 }
