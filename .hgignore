@@ -10,6 +10,7 @@
 ^tags\.temp$
 \.swp$
 \.swo$
+\.lvimrc$
 
 # macOS specific.
 \.DS_Store$
