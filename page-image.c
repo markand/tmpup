@@ -204,8 +204,8 @@ post(struct kreq *r)
 	const char *title = NULL,
 	           *author = NULL,
 	           *filename = NULL,
-	           *data = NULL,
 	           *duration = "day";
+	const unsigned char *data = NULL;
 	time_t start, end;
 	size_t datasz = 0;
 
@@ -227,7 +227,7 @@ post(struct kreq *r)
 			if (r->fields[i].file)
 				filename = r->fields[i].file;
 
-			data = r->fields[i].val;
+			data = (const unsigned char *)r->fields[i].val;
 			datasz = r->fields[i].valsz;
 		}
 	}
