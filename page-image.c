@@ -136,7 +136,7 @@ render(struct kreq *r, const struct image *image, const unsigned char *html, siz
 	};
 
 	khtml_open(&self.html, self.req, KHTML_PRETTY);
-	page_template(self.req, KHTTP_200, &kt, html, htmlsz);
+	page_template(self.req, "image", KHTTP_200, &kt, html, htmlsz);
 	khtml_close(&self.html);
 }
 

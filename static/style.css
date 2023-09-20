@@ -1,0 +1,73 @@
+/* https://palettes.shecodes.io/palettes/1422 */
+
+:root {
+	--first-color: #f0d78c;
+	--second-color: #fcfafa;
+	--third-color: #64c4ed;
+	--fourth-color: #4f81c7;
+}
+
+@font-face {
+	font-family: dosis;
+	src: url(/static/dosis.ttf);
+}
+
+* {
+	font-family: dosis;
+}
+
+a {
+	color: var(--fourth-color);
+}
+
+header {
+	overflow: hidden;
+	background-color: var(--second-color);
+
+}
+
+header > nav {
+	width: 70%;
+	margin: auto;
+}
+
+header > nav > a {
+	color: var(--third-color);
+	float: left;
+	font-size: large;
+	font-weight: 800;
+	padding: 1em 1em;
+	text-align: center;
+	text-decoration: none;
+}
+
+.container {
+	width: 70%;
+	margin: auto;
+}
+
+/* forms & inputs */
+
+form {
+	width: 30%;
+}
+
+.field {
+	margin-bottom: 2em;
+}
+
+.field > label {
+	margin-bottom: 0.5rem;
+	display: block;
+}
+
+.field > input, select, textarea {
+	width: 100%;
+}
+
+input[type=submit] {
+	background-color: var(--third-color);
+	padding: 0.5em;
+	border: none;
+	color: white;
+}

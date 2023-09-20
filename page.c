@@ -24,6 +24,9 @@
 #include "tmp.h"
 #include "util.h"
 
+#include "html/header.h"
+#include "html/footer.h"
+
 static const struct status {
 	enum khttp code;
 	const char *message;
@@ -31,6 +34,14 @@ static const struct status {
 	{ KHTTP_201, "Created"                  },
 	{ KHTTP_400, "Bad request"              },
 	{ KHTTP_404, "Not found"                }
+};
+
+enum {
+	KW_TITLE
+};
+
+static const char * const keywords[] = {
+	[KW_TITLE] = "title"
 };
 
 static int
@@ -61,21 +72,69 @@ json(enum khttp code, const char *msg)
 	);
 }
 
+struct hdrdata {
+	struct kreq *r;
+	const char *title;
+};
+
+static int
+format(size_t index, void *data)
+{
+	struct hdrdata *hdr = data;
+
+	switch (index) {
+	case KW_TITLE:
+		khttp_printf(hdr->r, "%s", hdr->title);
+		break;
+	default:
+		break;
+	}
+
+	return 1;
+}
+
+static void
+header(struct kreq *r, const char *title)
+{
+	struct hdrdata hdr = {
+		.r = r,
+		.title = title
+	};
+	struct ktemplate kt = {
+		.key = keywords,
+		.keysz = LEN(keywords),
+		.cb = format,
+		.arg = &hdr
+	};
+
+	khttp_template_buf(r, &kt, (const char *)html_header, sizeof (html_header));
+}
+
+static inline void
+footer(struct kreq *r)
+{
+	khttp_template_buf(r, NULL, (const char *)html_footer, sizeof (html_footer));
+}
+
 void
 page_template(struct kreq *r,
+              const char *title,
               enum khttp code,
               const struct ktemplate *kt,
               const unsigned char *html,
               size_t htmlsz)
 {
 	assert(r);
+	assert(title);
 	assert(kt);
 	assert(html);
 
 	khttp_head(r, kresps[KRESP_STATUS], "%s", khttps[code]);
 	khttp_head(r, kresps[KRESP_CONTENT_TYPE], "%s", kmimetypes[KMIME_TEXT_HTML]);
 	khttp_body(r);
+	header(r, title);
 	khttp_template_buf(r, kt, (const char *)html, htmlsz);
+	footer(r);
 }
 
 void

@@ -25,6 +25,10 @@
 
 /* CSS files. */
 #include "static/normalize.h"
+#include "static/style.h"
+
+/* fonts. */
+#include "static/dosis.h"
 
 #define STATIC(path, data, mime) { path, data, mime, sizeof (data) }
 
@@ -34,7 +38,9 @@ static struct entry {
 	enum kmime mime;
 	size_t datasz;
 } table[] = {
-	STATIC("normalize.css", static_normalize, KMIME_TEXT_CSS)
+	STATIC("normalize.css", static_normalize, KMIME_TEXT_CSS),
+	STATIC("style.css",     static_style, KMIME_TEXT_CSS),
+	STATIC("dosis.ttf",     static_dosis, KMIME_APP_OCTET_STREAM)
 };
 
 static void

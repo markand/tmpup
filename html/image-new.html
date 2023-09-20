@@ -1,18 +1,27 @@
-<form method="POST" action="/image/new" enctype="multipart/form-data">
-	<label for="title">Title</label><br>
-	<input id="title" name="title" type="text" value="@@title@@" placeholder="@@default-title@@"><br>
+	<h1>Upload a new image</h1>
+	<form method="POST" action="/image/new" enctype="multipart/form-data">
+		<div class="field">
+			<label for="title">Title</label>
+			<input id="title" name="title" type="text" value="@@title@@" placeholder="@@default-title@@">
+		</div>
 
-	<label for="author">Author</label><br>
-	<input id="author" name="author" type="text" value="@@author@@" placeholder="@@default-author@@"><br>
+		<div class="field">
+			<label for="author">Author</label>
+			<input id="author" name="author" type="text" value="@@author@@" placeholder="@@default-author@@">
+		</div>
 
-	<label>Filename</label><br>
-	<input name="filename" type="text"><br>
+		<div class="field">
+			<label>Filename</label>
+			<input name="filename" type="text">
+		</div>
 
-	<label>Duration</label><br>
-	<select name="duration">
-		@@durations@@
-	</select><br>
+		<div class="field">
+			<label>Duration</label>
+			<select name="duration">
+				@@durations@@
+			</select>
+		</div>
 
-	<input type="file" name="file"><br>
-	<input type="submit" value="Create">
-</form>
+		<input class="first-color" type="file" name="file">
+		<input type="submit" value="Create">
+	</form>

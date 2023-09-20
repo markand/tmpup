@@ -29,6 +29,7 @@ enum kmime;
 
 void
 page_template(struct kreq *r,
+              const char *title,
               enum khttp code,
               const struct ktemplate *kt,
               const unsigned char *html,

@@ -1,27 +1,38 @@
-<form method="POST" action="/paste/new">
-	<label for="title">Title</label><br>
-	<input id="title" name="title" type="text" value="@@title@@" placeholder="@@default-title@@"><br>
+	<h1>Create a new paste</h1>
+	<form method="POST" action="/paste/new">
+		<div class="field">
+			<label for="title">Title</label>
+			<input id="title" name="title" type="text" value="@@title@@" placeholder="@@default-title@@">
+		</div>
 
-	<label for="author">Author</label><br>
-	<input id="author" name="author" type="text" value="@@author@@" placeholder="@@default-author@@"><br>
+		<div class="field">
+			<label for="author">Author</label>
+			<input id="author" name="author" type="text" value="@@author@@" placeholder="@@default-author@@">
+		</div>
 
-	<label>Filename</label><br>
-	<input name="filename" type="text" value="@@filename@@" placeholder="@@default-filename@@"><br>
+		<div class="field">
+			<label>Filename</label>
+			<input name="filename" type="text" value="@@filename@@" placeholder="@@default-filename@@">
+		</div>
 
-	<label>Duration</label><br>
-	<select name="duration">
-		@@durations@@
-	</select><br>
+		<div class="field">
+			<label>Duration</label>
+			<select name="duration">
+				@@durations@@
+			</select>
+		</div>
 
-	<label>Language</label><br>
-	<select name="language">
-		@@languages@@
-	</select><br>
+		<div class="field">
+			<label>Language</label>
+			<select name="language">
+				@@languages@@
+			</select>
+		</div>
 
-	<label>Content</label><br>
-	<textarea name="code" placeholder="@@default-code@@">
-		@@code@@
-	</textarea><br>
+		<div class="field">
+			<label>Content</label>
+			<textarea name="code" placeholder="@@default-code@@">@@code@@</textarea>
+		</div>
 
-	<input type="submit" value="Create">
-</form>
+		<input type="submit" value="Create">
+	</form>

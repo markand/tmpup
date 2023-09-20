@@ -195,7 +195,7 @@ page_index(struct kreq *r, const char * const *args)
 	}
 
 	khtml_open(&self.html, self.req, 0);
-	page_template(r, KHTTP_200, &kt, html_index, sizeof (html_index));
+	page_template(r, "tmpup", KHTTP_200, &kt, html_index, sizeof (html_index));
 	khtml_close(&self.html);
 
 	db_finish(&self.db);

@@ -44,7 +44,9 @@ HTML_SRCS +=    html/paste-new.html
 HTML_SRCS +=    html/paste.html
 HTML_OBJS :=    $(HTML_SRCS:.html=.h)
 
+STATIC_OBJS :=  static/dosis.h
 STATIC_OBJS +=  static/normalize.h
+STATIC_OBJS +=  static/style.h
 
 TMPUPD_SRCS :=  extern/libsqlite/sqlite3.c
 TMPUPD_SRCS +=  base64.c
@@ -104,6 +106,9 @@ override CFLAGS   += -Iextern/libsqlite
 %.h: %.css
 	extern/bcc/bcc -cs $< $< > $@
 
+%.h: %.ttf
+	extern/bcc/bcc -cs $< $< > $@
+
 all: tmpupd tmpup
 
 $(SQL_OBJS): extern/bcc/bcc
@@ -117,7 +122,7 @@ $(STATIC_OBJS): extern/bcc/bcc
 # disable warnings on SQLite...
 extern/libsqlite/sqlite3.o: private CPPFLAGS += -Wno-unused-parameter
 
-$(TMPUPD_SRCS): $(HTML_OBJS) $(SQL_OBJS)
+$(TMPUPD_SRCS): $(HTML_OBJS) $(SQL_OBJS) $(STATIC_OBJS)
 $(TMPUPD_OBJS): private CFLAGS += $(JANSSON_INCS) $(KCGI_INCS) $(MAGIC_INCS)
 
 tmpupd: private LDLIBS += $(JANSSON_LIBS) $(KCGI_LIBS) $(MAGIC_LIBS) -lpthread
