@@ -1,12 +1,12 @@
 /*
- * page.h -- page helpers
+ * page-static.h -- page /static
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -16,28 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef TMPUPD_PAGE_STATUS
-#define TMPUPD_PAGE_STATUS
-
-#include <stddef.h>
+#ifndef TMPUPD_PAGE_STATIC_H
+#define TMPUPD_PAGE_STATIC_H
 
 struct kreq;
-struct ktemplate;
-
-enum khttp;
-enum kmime;
 
 void
-page_template(struct kreq *r,
-              enum khttp code,
-              const struct ktemplate *kt,
-              const unsigned char *html,
-              size_t htmlsz);
+page_static(struct kreq *, const char * const * args);
 
-void
-page_status(struct kreq *r, enum khttp code, enum kmime mime);
-
-void
-page_json(struct kreq *r, enum khttp code, const char *fmt, ...);
-
-#endif /* !TMPUPD_PAGE_STATUS */
+#endif /* !TMPUPD_PAGE_STATIC_H */

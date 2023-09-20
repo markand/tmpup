@@ -30,6 +30,7 @@
 #include "page-image.h"
 #include "page-index.h"
 #include "page-paste.h"
+#include "page-static.h"
 #include "page.h"
 #include "util.h"
 
@@ -57,7 +58,8 @@ static struct page pages[] = {
 	POST ("^/paste/new",                    page_paste_new),
 	GET  ("^/paste/([a-z0-9]+)$",           page_paste),
 	POST ("^/api/v0/image$",                page_api_v0_image),
-	POST ("^/api/v0/paste$",                page_api_v0_paste)
+	POST ("^/api/v0/paste$",                page_api_v0_paste),
+	GET  ("^/static/(.*)",                  page_static)
 };
 
 static pthread_t thread;

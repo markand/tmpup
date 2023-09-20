@@ -44,6 +44,8 @@ HTML_SRCS +=    html/paste-new.html
 HTML_SRCS +=    html/paste.html
 HTML_OBJS :=    $(HTML_SRCS:.html=.h)
 
+STATIC_OBJS +=  static/normalize.h
+
 TMPUPD_SRCS :=  extern/libsqlite/sqlite3.c
 TMPUPD_SRCS +=  base64.c
 TMPUPD_SRCS +=  check.c
@@ -58,6 +60,7 @@ TMPUPD_SRCS +=  page-api-v0-paste.c
 TMPUPD_SRCS +=  page-image.c
 TMPUPD_SRCS +=  page-index.c
 TMPUPD_SRCS +=  page-paste.c
+TMPUPD_SRCS +=  page-static.c
 TMPUPD_SRCS +=  page.c
 TMPUPD_SRCS +=  paste.c
 TMPUPD_SRCS +=  tmp.c
@@ -98,10 +101,14 @@ override CFLAGS   += -Iextern/libsqlite
 %.h: %.html
 	extern/bcc/bcc -cs $< $< > $@
 
+%.h: %.css
+	extern/bcc/bcc -cs $< $< > $@
+
 all: tmpupd tmpup
 
 $(SQL_OBJS): extern/bcc/bcc
 $(HTML_OBJS): extern/bcc/bcc
+$(STATIC_OBJS): extern/bcc/bcc
 
 # tmpupd
 
