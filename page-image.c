@@ -17,39 +17,48 @@
  */
 
 #include <assert.h>
+#include <string.h>
 
 #include "db-image.h"
 #include "db.h"
 #include "http.h"
+#include "image.h"
 #include "log.h"
 #include "page-image.h"
 #include "page.h"
-#include "image.h"
+#include "tmp.h"
 #include "tmpupd.h"
 #include "util.h"
 
+#include "html/image-new.h"
 #include "html/image.h"
 
 #define TAG "page-image: "
 
 struct self {
-	struct image image;
+	const struct image *image;
 	struct kreq *req;
 	struct khtmlreq html;
 };
 
 enum {
 	KW_AUTHOR,
+	KW_DEFAULT_AUTHOR,
+	KW_DEFAULT_TITLE,
+	KW_DURATIONS,
 	KW_EXPIRES,
 	KW_ID,
 	KW_TITLE
 };
 
 static const char * const keywords[] = {
-	[KW_AUTHOR]     = "author",
-	[KW_EXPIRES]    = "expires",
-	[KW_ID]         = "id",
-	[KW_TITLE]      = "title"
+	[KW_AUTHOR]             = "author",
+	[KW_DEFAULT_AUTHOR]	= "default-author",
+	[KW_DEFAULT_TITLE]      = "default-title",
+	[KW_DURATIONS]          = "durations",
+	[KW_EXPIRES]            = "expires",
+	[KW_ID]                 = "id",
+	[KW_TITLE]              = "title"
 };
 
 static int
@@ -59,16 +68,35 @@ format(size_t index, void *data)
 
 	switch (index) {
 	case KW_AUTHOR:
-		khtml_printf(&self->html, "%s", self->image.author);
+		if (self->image)
+			khtml_printf(&self->html, "%s", self->image->author);
+		break;
+	case KW_DEFAULT_AUTHOR:
+		khtml_printf(&self->html, "%s", TMP_DEFAULT_AUTHOR);
+		break;
+	case KW_DEFAULT_TITLE:
+		khtml_printf(&self->html, "%s", TMP_DEFAULT_TITLE);
+		break;
+	case KW_DURATIONS:
+		for (size_t i = 0; i < tmp_durationsz; ++i) {
+			khtml_attr(&self->html, KELEM_OPTION,
+			    KATTR_VALUE, tmp_durations[i],
+			    KATTR__MAX);
+			khtml_printf(&self->html, "%s", tmp_durations[i]);
+			khtml_closeelem(&self->html, 1);
+		}
 		break;
 	case KW_EXPIRES:
-		khtml_printf(&self->html, "%s", tmpupd_expiresin(self->image.start, self->image.end));
+		if (self->image)
+			khtml_printf(&self->html, "%s", tmpupd_expiresin(self->image->start, self->image->end));
 		break;
 	case KW_ID:
-		khtml_printf(&self->html, "%s", self->image.id);
+		if (self->image)
+			khtml_printf(&self->html, "%s", self->image->id);
 		break;
 	case KW_TITLE:
-		khtml_printf(&self->html, "%s", self->image.title);
+		if (self->image)
+			khtml_printf(&self->html, "%s", self->image->title);
 		break;
 	default:
 		break;
@@ -80,7 +108,7 @@ format(size_t index, void *data)
 static int
 find(struct image *img, const char *id)
 {
-	struct db db = {};
+	struct db db;
 	int rv;
 
 	log_debug(TAG "searching image '%s'", id);
@@ -95,10 +123,11 @@ find(struct image *img, const char *id)
 }
 
 static void
-get(struct kreq *r, const char * const *args)
+render(struct kreq *r, const struct image *image, const unsigned char *html, size_t htmlsz)
 {
 	struct self self = {
-		.req = r
+		.req = r,
+		.image = image
 	};
 	struct ktemplate kt = {
 		.key = keywords,
@@ -107,11 +136,20 @@ get(struct kreq *r, const char * const *args)
 		.arg = &self
 	};
 
-	switch (find(&self.image, args[0])) {
+	khtml_open(&self.html, self.req, KHTML_PRETTY);
+	page_template(self.req, KHTTP_200, &kt, html, htmlsz);
+	khtml_close(&self.html);
+}
+
+static void
+get(struct kreq *r, const char * const *args)
+{
+	struct image image;
+
+	switch (find(&image, args[0])) {
 	case 1:
-		khtml_open(&self.html, self.req, 0);
-		page_template(self.req, KHTTP_200, &kt, html_image, sizeof (html_image));
-		khtml_close(&self.html);
+		render(r, &image, html_image, sizeof (html_image));
+		image_finish(&image);
 		break;
 	case 0:
 		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
@@ -120,14 +158,12 @@ get(struct kreq *r, const char * const *args)
 		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
 		break;
 	}
-
-	image_finish(&self.image);
 }
 
 static void
 get_download(struct kreq *r, const char * const *args)
 {
-	struct image image = {};
+	struct image image;
 
 	switch (find(&image, args[0])) {
 	case 1:
@@ -138,6 +174,7 @@ get_download(struct kreq *r, const char * const *args)
 		    "attachment; filename=\"%s\"", image.filename);
 		khttp_body(r);
 		khttp_write(r, (const char *)image.data, image.datasz);
+		image_finish(&image);
 		break;
 	case 0:
 		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
@@ -146,20 +183,70 @@ get_download(struct kreq *r, const char * const *args)
 		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
 		break;
 	}
+}
 
-	image_finish(&image);
+static void
+get_new(struct kreq *r)
+{
+	/*
+	 * Reuse render with a NULL image because in contrast to paste images
+	 * can't be forked but we do have similar keywords in both HTML
+	 * templates though.
+	 */
+	render(r, NULL, html_image_new, sizeof (html_image_new));
 }
 
 static void
 post(struct kreq *r)
 {
 	struct db db;
+	struct image image;
+	const char *title = NULL,
+	           *author = NULL,
+	           *filename = NULL,
+	           *data = NULL,
+	           *duration = "day";
+	time_t start, end;
+	size_t datasz = 0;
 
 	if (tmpupd_open(&db, DB_RDWR) < 0) {
 		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
 		return;
 	}
 
+	for (size_t i = 0; i < r->fieldsz; ++i) {
+		if (strcmp(r->fields[i].key, "title") == 0 && r->fields[i].valsz)
+			title = r->fields[i].val;
+		else if (strcmp(r->fields[i].key, "author") == 0 && r->fields[i].valsz)
+			author = r->fields[i].val;
+		else if (strcmp(r->fields[i].key, "filename") == 0 && r->fields[i].valsz)
+			filename = r->fields[i].val;
+		else if (strcmp(r->fields[i].key, "duration") == 0 && r->fields[i].valsz)
+			duration = r->fields[i].val;
+		else if (strcmp(r->fields[i].key, "file") == 0) {
+			if (r->fields[i].file)
+				filename = r->fields[i].file;
+
+			data = r->fields[i].val;
+			datasz = r->fields[i].valsz;
+		}
+	}
+
+	tmpupd_condamn(&start, &end, duration);
+	image_init(&image, NULL, title, author, filename, data, datasz, start, end);
+
+	if (db_image_save(&image, &db) < 0) {
+		log_warn(TAG "unable to create image: %s", db.error);
+		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
+	} else {
+		/* Redirect to image details. */
+		log_debug(TAG "created new image '%s'", image.id);
+		khttp_head(r, kresps[KRESP_STATUS], "%s", khttps[KHTTP_302]);
+		khttp_head(r, kresps[KRESP_LOCATION], "/image/%s", image.id);
+		khttp_body(r);
+	}
+
+	image_finish(&image);
 	db_finish(&db);
 }
 
@@ -192,6 +279,25 @@ page_image_download(struct kreq *r, const char * const *args)
 		get_download(r, args);
 		break;
 	default:
+		break;
+	}
+}
+
+void
+page_image_new(struct kreq *r, const char * const *args)
+{
+	assert(r);
+	assert(args);
+
+	switch (r->method) {
+	case KMETHOD_GET:
+		get_new(r);
+		break;
+	case KMETHOD_POST:
+		post(r);
+		break;
+	default:
+		page_status(r, 400, KMIME_TEXT_HTML);
 		break;
 	}
 }

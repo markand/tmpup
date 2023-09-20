@@ -46,13 +46,15 @@ struct page {
 
 static struct page pages[] = {
 	GET  ("^/$",                            page_index),
-	GET  ("^/image/([a-z0-9]+)$",           page_image),
 	GET  ("^/image/download/([a-z0-9]+)$",  page_image_download),
+	GET  ("^/image/new",                    page_image_new),
+	POST ("^/image/new",                    page_image_new),
+	GET  ("^/image/([a-z0-9]+)$",           page_image),
 	GET  ("^/paste/download/([a-z0-9]+)$",  page_paste_download),
+	GET  ("^/paste/fork/([a-z0-9]+)?$",     page_paste_new),
 	GET  ("^/paste/raw/([a-z0-9]+)$",       page_paste_raw),
 	GET  ("^/paste/new",                    page_paste_new),
 	POST ("^/paste/new",                    page_paste_new),
-	GET  ("^/paste/fork/([a-z0-9]+)?$",     page_paste_new),
 	GET  ("^/paste/([a-z0-9]+)$",           page_paste),
 	POST ("^/api/v0/image$",                page_api_v0_image),
 	POST ("^/api/v0/paste$",                page_api_v0_paste)

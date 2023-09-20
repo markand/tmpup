@@ -323,7 +323,6 @@ post(struct kreq *r)
 		khttp_head(r, kresps[KRESP_STATUS], "%s", khttps[KHTTP_302]);
 		khttp_head(r, kresps[KRESP_LOCATION], "/paste/%s", paste.id);
 		khttp_body(r);
-		khttp_free(r);
 	}
 
 	paste_finish(&paste);

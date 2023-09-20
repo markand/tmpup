@@ -1,0 +1,18 @@
+<form method="POST" action="/image/new" enctype="multipart/form-data">
+	<label for="title">Title</label><br>
+	<input id="title" name="title" type="text" value="@@title@@" placeholder="@@default-title@@"><br>
+
+	<label for="author">Author</label><br>
+	<input id="author" name="author" type="text" value="@@author@@" placeholder="@@default-author@@"><br>
+
+	<label>Filename</label><br>
+	<input name="filename" type="text"><br>
+
+	<label>Duration</label><br>
+	<select name="duration">
+		@@durations@@
+	</select><br>
+
+	<input type="file" name="file"><br>
+	<input type="submit" value="Create">
+</form>

@@ -37,6 +37,7 @@ SQL_OBJS :=     $(SQL_SRCS:.sql=.h)
 
 HTML_SRCS :=    html/footer.html
 HTML_SRCS +=    html/header.html
+HTML_SRCS +=    html/image-new.html
 HTML_SRCS +=    html/image.html
 HTML_SRCS +=    html/index.html
 HTML_SRCS +=    html/paste-new.html
