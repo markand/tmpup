@@ -104,24 +104,12 @@ routine(void *data)
 		die("abort: could not allocate FastCGI");
 
 	while (run) {
-		/* TODO: check return code. */
-		switch (khttp_fcgi_parse(fcgi, &req)) {
-		case KCGI_OK:
+		if (khttp_fcgi_parse(fcgi, &req) == KCGI_OK) {
 			http_process(&req);
 			khttp_free(&req);
-			break;
-		case KCGI_EXIT:
-			/* This is received from the main thread. */
+		} else {
+			kill(getpid(), SIGINT);
 			run = 0;
-			break;
-		default:
-			/*
-			 * Other error, break the loop and send SIGINT to main
-			 * thread to stop the whole application.
-			 */
-			raise(SIGINT);
-			run = 0;
-			break;
 		}
 	}
 
