@@ -1,5 +1,5 @@
 /*
- * page-api-v0-paste.c -- page /api/v0/paste
+ * route-api-v0-image.c -- route /api/v0/image
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -19,48 +19,53 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "db-paste.h"
+#include "check.h"
+#include "db-image.h"
 #include "db.h"
 #include "http.h"
+#include "image.h"
 #include "log.h"
-#include "page-api-v0-paste.h"
-#include "page.h"
-#include "paste.h"
+#include "route-api-v0-image.h"
+#include "route.h"
 #include "tmpupd.h"
 
-#define TAG "page-api-v0-paste: "
+#define TAG "route-api-v0-image: "
 
 static void
 post(struct kreq *r)
 {
-	struct paste paste = {0};
+	struct image image;
 	struct db db;
 	char error[128] = "invalid input";
 
-	if (!r->fieldsz || paste_parse(&paste, r->fields[0].val, error, sizeof (error)) < 0) {
-		page_json(r, KHTTP_400, "{ss}", "error", error);
+	if (!r->fieldsz || image_parse(&image, r->fields[0].val, error, sizeof (error)) < 0) {
+		route_json(r, KHTTP_400, "{ss}", "error", error);
 		return;
 	}
 
-	if (tmpupd_open(&db, DB_RDWR) < 0)
-		page_status(r, KHTTP_500, KMIME_APP_JSON);
+	if (check_image(image.data, image.datasz) < 0)
+		route_json(r, KHTTP_400, "{ss}", "error", "not a valid image");
 	else {
-		if (db_paste_save(&paste, &db) < 0) {
-			log_warn(TAG "unable to create paste: %s", db.error);
-			page_status(r, KHTTP_500, KMIME_APP_JSON);
-		} else {
-			log_info(TAG "created paste '%s'", paste.id);
-			page_json(r, KHTTP_201, "{ss}", "id", paste.id);
-		}
+		if (tmpupd_open(&db, DB_RDWR) < 0)
+			route_status(r, KHTTP_500, KMIME_APP_JSON);
+		else {
+			if (db_image_save(&image, &db) < 0) {
+				log_warn(TAG "unable to create image: %s", db.error);
+				route_status(r, KHTTP_500, KMIME_APP_JSON);
+			} else {
+				log_info(TAG "created image '%s'", image.id);
+				route_json(r, KHTTP_201, "{ss}", "id", image.id);
+			}
 
-		db_finish(&db);
+			db_finish(&db);
+		}
 	}
 
-	paste_finish(&paste);
+	image_finish(&image);
 }
 
 void
-page_api_v0_paste(struct kreq *r, const char * const *args)
+route_api_v0_image(struct kreq *r, const char * const *args)
 {
 	assert(r);
 

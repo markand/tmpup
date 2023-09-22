@@ -1,5 +1,5 @@
 /*
- * page-index.h -- route /
+ * route-image.h -- route /image
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -16,20 +16,32 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef TMPUPD_PAGE_INDEX
-#define TMPUPD_PAGE_INDEX
+#ifndef TMPUPD_ROUTE_IMAGE
+#define TMPUPD_ROUTE_IMAGE
 
 /**
- * \file page-index.h
- * \brief route /
+ * \file route-image.h
+ * \brief Routes /image.
  */
 
 struct kreq;
 
 /**
- * Implement / route
+ * Implement /image route.
  */
 void
-page_index(struct kreq *r, const char * const *args);
+route_image(struct kreq *r, const char * const *args);
 
-#endif /* !TMPUPD_PAGE_INDEX */
+/**
+ * Implement /image/download/<id> route.
+ */
+void
+route_image_download(struct kreq *r, const char * const *args);
+
+/**
+ * Implement /image/new route.
+ */
+void
+route_image_new(struct kreq *r, const char * const *args);
+
+#endif /* !TMPUPD_ROUTE_IMAGE */

@@ -25,41 +25,41 @@
 
 #include "http.h"
 #include "log.h"
-#include "page-api-v0-image.h"
-#include "page-api-v0-paste.h"
-#include "page-image.h"
-#include "page-index.h"
-#include "page-paste.h"
-#include "page-static.h"
-#include "page.h"
+#include "route-api-v0-image.h"
+#include "route-api-v0-paste.h"
+#include "route-image.h"
+#include "route-index.h"
+#include "route-paste.h"
+#include "route-static.h"
+#include "route.h"
 #include "util.h"
 
 /* Need to use this to avoid "uninitialized regex field". smh. */
 #define GET(p, e)       { .method = KMETHOD_GET,  .path = p, .exec = e }
 #define POST(p, e)      { .method = KMETHOD_POST, .path = p, .exec = e }
 
-struct page {
+struct route {
 	enum kmethod method;
 	const char *path;
 	void (*exec)(struct kreq *, const char * const *);
 	regex_t regex;
 };
 
-static struct page pages[] = {
-	GET  ("^/$",                            page_index),
-	GET  ("^/image/download/([a-z0-9]+)$",  page_image_download),
-	GET  ("^/image/new",                    page_image_new),
-	POST ("^/image/new",                    page_image_new),
-	GET  ("^/image/([a-z0-9]+)$",           page_image),
-	GET  ("^/paste/download/([a-z0-9]+)$",  page_paste_download),
-	GET  ("^/paste/fork/([a-z0-9]+)?$",     page_paste_new),
-	GET  ("^/paste/raw/([a-z0-9]+)$",       page_paste_raw),
-	GET  ("^/paste/new",                    page_paste_new),
-	POST ("^/paste/new",                    page_paste_new),
-	GET  ("^/paste/([a-z0-9]+)$",           page_paste),
-	POST ("^/api/v0/image$",                page_api_v0_image),
-	POST ("^/api/v0/paste$",                page_api_v0_paste),
-	GET  ("^/static/(.*)",                  page_static)
+static struct route routes[] = {
+	GET  ("^/$",                            route_index),
+	GET  ("^/image/download/([a-z0-9]+)$",  route_image_download),
+	GET  ("^/image/new",                    route_image_new),
+	POST ("^/image/new",                    route_image_new),
+	GET  ("^/image/([a-z0-9]+)$",           route_image),
+	GET  ("^/paste/download/([a-z0-9]+)$",  route_paste_download),
+	GET  ("^/paste/fork/([a-z0-9]+)?$",     route_paste_new),
+	GET  ("^/paste/raw/([a-z0-9]+)$",       route_paste_raw),
+	GET  ("^/paste/new",                    route_paste_new),
+	POST ("^/paste/new",                    route_paste_new),
+	GET  ("^/paste/([a-z0-9]+)$",           route_paste),
+	POST ("^/api/v0/image$",                route_api_v0_image),
+	POST ("^/api/v0/paste$",                route_api_v0_paste),
+	GET  ("^/static/(.*)",                  route_static)
 };
 
 static pthread_t thread;
@@ -97,25 +97,25 @@ process(struct kreq *r)
 	assert(r);
 
 	regmatch_t matches[8];
-	struct page *page = NULL, *iter;
+	struct route *route = NULL, *iter;
 	char **args;
 
-	for (size_t i = 0; i < LEN(pages); ++i) {
-		iter = &pages[i];
+	for (size_t i = 0; i < LEN(routes); ++i) {
+		iter = &routes[i];
 
 		if (r->method != iter->method)
 			continue;
 		if (regexec(&iter->regex, r->fullpath, LEN(matches), matches, 0) == 0) {
-			page = iter;
+			route = iter;
 			break;
 		}
 	}
 
-	if (!page)
-		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
+	if (!route)
+		route_status(r, KHTTP_404, KMIME_TEXT_HTML);
 	else {
 		args = makeargs(r->fullpath, matches, LEN(matches));
-		page->exec(r, (const char * const *)args);
+		route->exec(r, (const char * const *)args);
 		freeargs(args);
 	}
 }
@@ -150,16 +150,16 @@ routine(void *data)
 void
 http_init(void)
 {
-	struct page *page;
+	struct route *route;
 	int rv;
 	char errstr[128] = "unknown error";
 
-	for (size_t i = 0; i < LEN(pages); ++i) {
-		page = &pages[i];
-		rv = regcomp(&page->regex, page->path, REG_EXTENDED | REG_ICASE);
+	for (size_t i = 0; i < LEN(routes); ++i) {
+		route = &routes[i];
+		rv = regcomp(&route->regex, route->path, REG_EXTENDED | REG_ICASE);
 
 		if (rv != 0) {
-			regerror(rv, &page->regex, errstr, sizeof (errstr));
+			regerror(rv, &route->regex, errstr, sizeof (errstr));
 			die("abort: regex failed: %s\n", errstr);
 		}
 	}
@@ -171,8 +171,8 @@ http_init(void)
 void
 http_finish(void)
 {
-	for (size_t i = 0; i < LEN(pages); ++i)
-		regfree(&pages[i].regex);
+	for (size_t i = 0; i < LEN(routes); ++i)
+		regfree(&routes[i].regex);
 
 	pthread_join(thread, NULL);
 }

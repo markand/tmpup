@@ -1,12 +1,12 @@
 /*
- * page-static.h -- route /static
+ * page-api-v0-paste.h -- route /api/v0/paste
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
- * 
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -16,20 +16,20 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef TMPUPD_PAGE_STATIC_H
-#define TMPUPD_PAGE_STATIC_H
+#ifndef TMPUPD_ROUTE_API_V0_PASTE
+#define TMPUPD_ROUTE_API_V0_PASTE
 
 /**
- * \file page-static.h
- * \brief Route /static.
+ * \file page-api-v0-paste.h
+ * \brief Route /api/v0/paste.
  */
 
 struct kreq;
 
 /**
- * Implement /static/<res> route.
+ * Implement /api/v0/paste route
  */
 void
-page_static(struct kreq *, const char * const * args);
+route_api_v0_paste(struct kreq *r, const char * const *args);
 
-#endif /* !TMPUPD_PAGE_STATIC_H */
+#endif /* !TMPUPD_ROUTE_API_V0_PASTE */

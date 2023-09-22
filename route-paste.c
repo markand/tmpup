@@ -1,5 +1,5 @@
 /*
- * page-paste.c -- page /paste
+ * route-paste.c -- route /paste
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -23,9 +23,9 @@
 #include "db.h"
 #include "http.h"
 #include "log.h"
-#include "page-paste.h"
-#include "page.h"
 #include "paste.h"
+#include "route-paste.h"
+#include "route.h"
 #include "tmp.h"
 #include "tmpupd.h"
 #include "util.h"
@@ -33,7 +33,7 @@
 #include "html/paste.h"
 #include "html/paste-new.h"
 
-#define TAG "page-paste: "
+#define TAG "route-paste: "
 
 struct self {
 	const struct paste *paste;
@@ -190,7 +190,7 @@ render(struct kreq *r, const struct paste *paste, const unsigned char *html, siz
 	};
 
 	khtml_open(&self.html, self.req, KHTML_PRETTY);
-	page_template(self.req, "paste", KHTTP_200, &kt, html, htmlsz);
+	route_template(self.req, "paste", KHTTP_200, &kt, html, htmlsz);
 	khtml_close(&self.html);
 }
 
@@ -205,10 +205,10 @@ get(struct kreq *r, const char * const *args)
 		paste_finish(&paste);
 		break;
 	case 0:
-		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_404, KMIME_TEXT_HTML);
 		break;
 	default:
-		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_500, KMIME_TEXT_HTML);
 		break;
 	}
 }
@@ -230,10 +230,10 @@ get_download(struct kreq *r, const char * const *args)
 		paste_finish(&paste);
 		break;
 	case 0:
-		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_404, KMIME_TEXT_HTML);
 		break;
 	default:
-		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_500, KMIME_TEXT_HTML);
 		break;
 	}
 }
@@ -251,10 +251,10 @@ get_raw(struct kreq *r, const char * const *args)
 		khttp_head(r, kresps[KRESP_STATUS], "%s", khttps[KHTTP_200]);
 		break;
 	case 0:
-		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_404, KMIME_TEXT_HTML);
 		break;
 	default:
-		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_500, KMIME_TEXT_HTML);
 		break;
 	}
 }
@@ -293,7 +293,7 @@ post(struct kreq *r)
 	time_t start, end;
 
 	if (tmpupd_open(&db, DB_RDWR) < 0) {
-		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_500, KMIME_TEXT_HTML);
 		return;
 	}
 
@@ -317,7 +317,7 @@ post(struct kreq *r)
 
 	if (db_paste_save(&paste, &db) < 0) {
 		log_warn(TAG "unable to create paste: %s", db.error);
-		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_500, KMIME_TEXT_HTML);
 	} else {
 		/* Redirect to paste details. */
 		log_debug(TAG "created new paste '%s'", paste.id);
@@ -331,7 +331,7 @@ post(struct kreq *r)
 }
 
 void
-page_paste(struct kreq *r, const char * const *args)
+route_paste(struct kreq *r, const char * const *args)
 {
 	assert(r);
 	assert(args);
@@ -344,13 +344,13 @@ page_paste(struct kreq *r, const char * const *args)
 		post(r);
 		break;
 	default:
-		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_400, KMIME_TEXT_HTML);
 		break;
 	}
 }
 
 void
-page_paste_download(struct kreq *r, const char * const *args)
+route_paste_download(struct kreq *r, const char * const *args)
 {
 	assert(r);
 	assert(args);
@@ -360,13 +360,13 @@ page_paste_download(struct kreq *r, const char * const *args)
 		get_download(r, args);
 		break;
 	default:
-		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_400, KMIME_TEXT_HTML);
 		break;
 	}
 }
 
 void
-page_paste_raw(struct kreq *r, const char * const *args)
+route_paste_raw(struct kreq *r, const char * const *args)
 {
 	assert(r);
 	assert(args);
@@ -376,13 +376,13 @@ page_paste_raw(struct kreq *r, const char * const *args)
 		get_raw(r, args);
 		break;
 	default:
-		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_400, KMIME_TEXT_HTML);
 		break;
 	}
 }
 
 void
-page_paste_new(struct kreq *r, const char * const *args)
+route_paste_new(struct kreq *r, const char * const *args)
 {
 	assert(r);
 	assert(args);
@@ -395,7 +395,7 @@ page_paste_new(struct kreq *r, const char * const *args)
 		post(r);
 		break;
 	default:
-		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_400, KMIME_TEXT_HTML);
 		break;
 	}
 }

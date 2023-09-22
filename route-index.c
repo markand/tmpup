@@ -1,5 +1,5 @@
 /*
- * page-index.c -- page /
+ * route-index.c -- route /
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -25,9 +25,9 @@
 #include "db.h"
 #include "http.h"
 #include "image.h"
-#include "page-index.h"
-#include "page.h"
 #include "paste.h"
+#include "route-index.h"
+#include "route.h"
 #include "tmpupd.h"
 #include "util.h"
 
@@ -173,7 +173,7 @@ format(size_t index, void *arg)
 }
 
 void
-page_index(struct kreq *r, const char * const *args)
+route_index(struct kreq *r, const char * const *args)
 {
 	(void)args;
 
@@ -190,12 +190,12 @@ page_index(struct kreq *r, const char * const *args)
 	};
 
 	if (tmpupd_open(&self.db, DB_RDONLY) < 0) {
-		page_status(r, KHTTP_500, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_500, KMIME_TEXT_HTML);
 		return;
 	}
 
 	khtml_open(&self.html, self.req, 0);
-	page_template(r, "tmpup", KHTTP_200, &kt, html_index, sizeof (html_index));
+	route_template(r, "tmpup", KHTTP_200, &kt, html_index, sizeof (html_index));
 	khtml_close(&self.html);
 
 	db_finish(&self.db);

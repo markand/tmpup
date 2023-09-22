@@ -1,5 +1,5 @@
 /*
- * page-api-v0-paste.h -- route /api/v0/paste
+ * route-index.h -- route /
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -16,20 +16,20 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef TMPUPD_PAGE_API_V0_PASTE
-#define TMPUPD_PAGE_API_V0_PASTE
+#ifndef TMPUPD_ROUTE_INDEX
+#define TMPUPD_ROUTE_INDEX
 
 /**
- * \file page-api-v0-paste.h
- * \brief Route /api/v0/paste.
+ * \file route-index.h
+ * \brief route /
  */
 
 struct kreq;
 
 /**
- * Implement /api/v0/paste route
+ * Implement / route
  */
 void
-page_api_v0_paste(struct kreq *r, const char * const *args);
+route_index(struct kreq *r, const char * const *args);
 
-#endif /* !TMPUPD_PAGE_API_V0_PASTE */
+#endif /* !TMPUPD_ROUTE_INDEX */

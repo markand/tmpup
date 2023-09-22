@@ -1,5 +1,5 @@
 /*
- * page.h -- page helpers
+ * route.h -- route helpers
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef TMPUPD_PAGE_STATUS
-#define TMPUPD_PAGE_STATUS
+#ifndef TMPUPD_ROUTE_STATUS
+#define TMPUPD_ROUTE_STATUS
 
 /**
- * \file page.h
+ * \file route.h
  * \brief Page helpers.
  */
 
@@ -33,19 +33,19 @@
 #include <kcgihtml.h>
 
 /**
- * Render the page using the HTML template.
+ * Render the route using the HTML template.
  *
  * \pre r != NULL
  * \pre title != NULL
  * \pre html != NULL
  * \param r the kcgi request
- * \param title page title
+ * \param title route title
  * \param code HTTP result code
  * \param html the HTML template
  * \param htmlsz HTML data length
  */
 void
-page_template(struct kreq *r,
+route_template(struct kreq *r,
               const char *title,
               enum khttp code,
               const struct ktemplate *kt,
@@ -53,7 +53,7 @@ page_template(struct kreq *r,
               size_t htmlsz);
 
 /**
- * Create a status page either in the form of HTML or JSON depending on the
+ * Create a status route either in the form of HTML or JSON depending on the
  * mime type.
  *
  * \pre r != NULL
@@ -62,10 +62,10 @@ page_template(struct kreq *r,
  * \param mime the mime type (KMIME_APP_JSON or KMIME_TEXT_HTML)
  */
 void
-page_status(struct kreq *r, enum khttp code, enum kmime mime);
+route_status(struct kreq *r, enum khttp code, enum kmime mime);
 
 /**
- * Create a JSON result page using the jansson packing function.
+ * Create a JSON result route using the jansson packing function.
  *
  * \pre r != NULL
  * \param r the kcgi request
@@ -73,6 +73,6 @@ page_status(struct kreq *r, enum khttp code, enum kmime mime);
  * \param fmt the format string to pass to json_pack
  */
 void
-page_json(struct kreq *r, enum khttp code, const char *fmt, ...);
+route_json(struct kreq *r, enum khttp code, const char *fmt, ...);
 
-#endif /* !TMPUPD_PAGE_STATUS */
+#endif /* !TMPUPD_ROUTE_STATUS */

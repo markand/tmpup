@@ -1,5 +1,5 @@
 /*
- * page.c -- page helpers
+ * route.c -- route helpers
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -20,7 +20,7 @@
 #include <stdlib.h>
 
 #include "http.h"
-#include "page.h"
+#include "route.h"
 #include "tmp.h"
 #include "util.h"
 
@@ -117,7 +117,7 @@ footer(struct kreq *r)
 }
 
 void
-page_template(struct kreq *r,
+route_template(struct kreq *r,
               const char *title,
               enum khttp code,
               const struct ktemplate *kt,
@@ -138,7 +138,7 @@ page_template(struct kreq *r,
 }
 
 void
-page_status(struct kreq *r, enum khttp code, enum kmime mime)
+route_status(struct kreq *r, enum khttp code, enum kmime mime)
 {
 	assert(r);
 
@@ -167,7 +167,7 @@ page_status(struct kreq *r, enum khttp code, enum kmime mime)
 }
 
 void
-page_json(struct kreq *r, enum khttp code, const char *fmt, ...)
+route_json(struct kreq *r, enum khttp code, const char *fmt, ...)
 {
 	assert(r);
 	assert(fmt);

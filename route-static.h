@@ -1,12 +1,12 @@
 /*
- * page-image.h -- routes /image
+ * route-static.h -- route /static
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
- *
+ * 
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -16,32 +16,20 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef TMPUPD_PAGE_IMAGE
-#define TMPUPD_PAGE_IMAGE
+#ifndef TMPUPD_ROUTE_STATIC_H
+#define TMPUPD_ROUTE_STATIC_H
 
 /**
- * \file page-image.h
- * \brief Routes /image.
+ * \file route-static.h
+ * \brief Route /static.
  */
 
 struct kreq;
 
 /**
- * Implement /image route.
+ * Implement /static/<res> route.
  */
 void
-page_image(struct kreq *r, const char * const *args);
+route_static(struct kreq *, const char * const * args);
 
-/**
- * Implement /image/download/<id> route.
- */
-void
-page_image_download(struct kreq *r, const char * const *args);
-
-/**
- * Implement /image/new route.
- */
-void
-page_image_new(struct kreq *r, const char * const *args);
-
-#endif /* !TMPUPD_PAGE_IMAGE */
+#endif /* !TMPUPD_ROUTE_STATIC_H */

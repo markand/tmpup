@@ -1,5 +1,5 @@
 /*
- * page-static.c -- page /static
+ * route-static.c -- route /static
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  * 
@@ -20,7 +20,7 @@
 #include <string.h>
 
 #include "http.h"
-#include "page.h"
+#include "route.h"
 #include "util.h"
 
 /* CSS files. */
@@ -62,11 +62,11 @@ get(struct kreq *req, const char *file)
 		khttp_body(req);
 		khttp_write(req, (const char *)ent->data, ent->datasz);
 	} else
-		page_status(req, KHTTP_404, KMIME_TEXT_HTML);
+		route_status(req, KHTTP_404, KMIME_TEXT_HTML);
 }
 
 void
-page_static(struct kreq *r, const char * const *args)
+route_static(struct kreq *r, const char * const *args)
 {
 	assert(r);
 	assert(args);
@@ -76,7 +76,7 @@ page_static(struct kreq *r, const char * const *args)
 		get(r, args[0]);
 		break;
 	default:
-		page_status(r, KHTTP_400, KMIME_TEXT_HTML);
+		route_status(r, KHTTP_400, KMIME_TEXT_HTML);
 		break;
 	}
 }

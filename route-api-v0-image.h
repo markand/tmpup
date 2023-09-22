@@ -1,5 +1,5 @@
 /*
- * page-paste.h -- routes /paste
+ * route-api-v0-image.h -- route /api/v0/image
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -16,41 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef TMPUPD_PAGE_PASTE
-#define TMPUPD_PAGE_PASTE
-
-/**
- * \file page-paste.h
- * \brief Routes /paste.
- */
+#ifndef TMPUPD_ROUTE_API_V0_IMAGE
+#define TMPUPD_ROUTE_API_V0_IMAGE
 
 struct kreq;
 
 /**
- * Implement /paste route.
+ * Implement /api/v0/image route
  */
 void
-page_paste(struct kreq *r, const char * const *args);
+route_api_v0_image(struct kreq *r, const char * const *args);
 
-/**
- * Implement /paste/download/<id> route.
- */
-void
-page_paste_download(struct kreq *r, const char * const *args);
-
-/**
- * Implement /paste/raw/<id> route.
- */
-void
-page_paste_raw(struct kreq *r, const char * const *args);
-
-/**
- * Implements:
- *
- * - /paste/fork/<id>
- * - /paste/new
- */
-void
-page_paste_new(struct kreq *r, const char * const *args);
-
-#endif /* !TMPUPD_PAGE_PASTE */
+#endif /* !TMPUPD_ROUTE_API_V0_IMAGE */
