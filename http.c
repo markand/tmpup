@@ -91,6 +91,35 @@ freeargs(char **list)
 	free(list);
 }
 
+static void
+process(struct kreq *r)
+{
+	assert(r);
+
+	regmatch_t matches[8];
+	struct page *page = NULL, *iter;
+	char **args;
+
+	for (size_t i = 0; i < LEN(pages); ++i) {
+		iter = &pages[i];
+
+		if (r->method != iter->method)
+			continue;
+		if (regexec(&iter->regex, r->fullpath, LEN(matches), matches, 0) == 0) {
+			page = iter;
+			break;
+		}
+	}
+
+	if (!page)
+		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
+	else {
+		args = makeargs(r->fullpath, matches, LEN(matches));
+		page->exec(r, (const char * const *)args);
+		freeargs(args);
+	}
+}
+
 static void *
 routine(void *data)
 {
@@ -105,7 +134,7 @@ routine(void *data)
 
 	while (run) {
 		if (khttp_fcgi_parse(fcgi, &req) == KCGI_OK) {
-			http_process(&req);
+			process(&req);
 			khttp_free(&req);
 		} else {
 			kill(getpid(), SIGINT);
@@ -137,35 +166,6 @@ http_init(void)
 
 	if ((rv = pthread_create(&thread, NULL, routine, NULL)) != 0)
 		die("abort: pthread_create: %s\n", strerror(rv));
-}
-
-void
-http_process(struct kreq *r)
-{
-	assert(r);
-
-	regmatch_t matches[8] = {};
-	struct page *page = NULL, *iter;
-	char **args;
-
-	for (size_t i = 0; i < LEN(pages); ++i) {
-		iter = &pages[i];
-
-		if (r->method != iter->method)
-			continue;
-		if (regexec(&iter->regex, r->fullpath, LEN(matches), matches, 0) == 0) {
-			page = iter;
-			break;
-		}
-	}
-
-	if (!page)
-		page_status(r, KHTTP_404, KMIME_TEXT_HTML);
-	else {
-		args = makeargs(r->fullpath, matches, LEN(matches));
-		page->exec(r, (const char * const *)args);
-		freeargs(args);
-	}
 }
 
 void

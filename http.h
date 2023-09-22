@@ -19,29 +19,11 @@
 #ifndef TMPUPD_HTTP_H
 #define TMPUPD_HTTP_H
 
-#include <sys/types.h>
-#include <stdarg.h>
-#include <stdint.h>
-
-#include <kcgi.h>
-#include <kcgihtml.h>
-
 /**
  * Initialize HTTP system.
  */
 void
 http_init(void);
-
-/**
- * Process incoming request.
- *
- * This function does not finalize the request, use khttp_free.
- *
- * \pre r != NULL
- * \param r the HTTP request
- */
-void
-http_process(struct kreq *r);
 
 /**
  * Cleanup HTTP system.

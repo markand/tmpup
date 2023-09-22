@@ -19,13 +19,13 @@
 #ifndef TMPUPD_PAGE_STATUS
 #define TMPUPD_PAGE_STATUS
 
+#include <sys/types.h>
+#include <stdarg.h>
 #include <stddef.h>
+#include <stdint.h>
 
-struct kreq;
-struct ktemplate;
-
-enum khttp;
-enum kmime;
+#include <kcgi.h>
+#include <kcgihtml.h>
 
 void
 page_template(struct kreq *r,
