@@ -1,5 +1,5 @@
 /*
- * page-image.h -- page /image
+ * page-image.h -- routes /image
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -19,14 +19,28 @@
 #ifndef TMPUPD_PAGE_IMAGE
 #define TMPUPD_PAGE_IMAGE
 
+/**
+ * \file page-image.h
+ * \brief Routes /image.
+ */
+
 struct kreq;
 
+/**
+ * Implement /image route.
+ */
 void
 page_image(struct kreq *r, const char * const *args);
 
+/**
+ * Implement /image/download/<id> route.
+ */
 void
 page_image_download(struct kreq *r, const char * const *args);
 
+/**
+ * Implement /image/new route.
+ */
 void
 page_image_new(struct kreq *r, const char * const *args);
 

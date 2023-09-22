@@ -19,6 +19,11 @@
 #ifndef TMPUPD_DB_IMAGE_H
 #define TMPUPD_DB_IMAGE_H
 
+/**
+ * \file db-image.h
+ * \brief Storage helpers for a image.
+ */
+
 #include <sys/types.h>
 
 struct db;

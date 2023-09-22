@@ -24,23 +24,43 @@
 struct db;
 enum db_mode;
 
+/**
+ * Convenient function to open and initialize the database depending on the
+ * mode given. Also logs an error message if it fails.
+ *
+ * \pre db != NULL
+ * \param db the database to initialize
+ * \param mode the desired mode
+ * \return 0 on success or -1 on error
+ */
 int
-tmpupd_open(struct db *, enum db_mode);
+tmpupd_open(struct db *db, enum db_mode mode);
 
 /**
- * Create a somewhat unique identifier as much as we can.
+ * Returns a static string with a human format telling the duration left for
+ * the given timestamp range.
  *
- * \return a newly allocated identifier (to be free'd)
+ * \param start UTC start timestamp
+ * \param end UTC end timestamp
+ * \return a static thread local string with the left time
  */
-char *
-tmpupd_newid(void);
-
 const char *
 tmpupd_expiresin(time_t start, time_t end);
 
-int
-tmpupd_isimage(const char *data, size_t datasz);
-
+/**
+ * Sets start and end arguments to the appropriate time depending on the
+ * duration field which can be one of: `hour`, `day`, `week`, `month`.
+ *
+ * The argument start is always set to the current system time, end will be
+ * computed from start plus the amount of seconds.
+ *
+ * \pre start != NULL
+ * \pre end != NULL
+ * \pre duration != NULL
+ * \param start UTC start timestamp to set
+ * \param end UTC end timestamp to set
+ * \param duration string
+ */
 void
 tmpupd_condamn(time_t *start, time_t *end, const char *duration);
 

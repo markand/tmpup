@@ -1,5 +1,5 @@
 /*
- * page-paste.h -- page /paste
+ * page-paste.h -- routes /paste
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -19,18 +19,37 @@
 #ifndef TMPUPD_PAGE_PASTE
 #define TMPUPD_PAGE_PASTE
 
-struct kreq;
-struct paste;
+/**
+ * \file page-paste.h
+ * \brief Routes /paste.
+ */
 
+struct kreq;
+
+/**
+ * Implement /paste route.
+ */
 void
 page_paste(struct kreq *r, const char * const *args);
 
+/**
+ * Implement /paste/download/<id> route.
+ */
 void
 page_paste_download(struct kreq *r, const char * const *args);
 
+/**
+ * Implement /paste/raw/<id> route.
+ */
 void
 page_paste_raw(struct kreq *r, const char * const *args);
 
+/**
+ * Implements:
+ *
+ * - /paste/fork/<id>
+ * - /paste/new
+ */
 void
 page_paste_new(struct kreq *r, const char * const *args);
 

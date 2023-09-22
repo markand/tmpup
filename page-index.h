@@ -1,5 +1,5 @@
 /*
- * page-index.h -- page /
+ * page-index.h -- route /
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  *
@@ -19,8 +19,16 @@
 #ifndef TMPUPD_PAGE_INDEX
 #define TMPUPD_PAGE_INDEX
 
+/**
+ * \file page-index.h
+ * \brief route /
+ */
+
 struct kreq;
 
+/**
+ * Implement / route
+ */
 void
 page_index(struct kreq *r, const char * const *args);
 

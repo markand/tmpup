@@ -39,6 +39,9 @@
 extern const char * const tmp_durations[];
 extern size_t tmp_durationsz;
 
+/**
+ * Dynamically allocate a new random id.
+ */
 char *
 tmp_id(void);
 
@@ -54,6 +57,9 @@ tmp_id(void);
 char *
 tmp_json(const char *fmt, ...);
 
+/**
+ * Same function as ::tmp_json but using `va_list` instead.
+ */
 char *
 tmp_jsonv(const char *fmt, va_list ap);
 

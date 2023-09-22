@@ -19,6 +19,11 @@
 #ifndef TMPUPD_DB_PASTE_H
 #define TMPUPD_DB_PASTE_H
 
+/**
+ * \file db-paste.h
+ * \brief Storage helpers for a paste.
+ */
+
 #include <sys/types.h>
 
 struct db;

@@ -1,5 +1,5 @@
 /*
- * page-static.h -- page /static
+ * page-static.h -- route /static
  *
  * Copyright (c) 2023 David Demelier <markand@malikania.fr>
  * 
@@ -19,8 +19,16 @@
 #ifndef TMPUPD_PAGE_STATIC_H
 #define TMPUPD_PAGE_STATIC_H
 
+/**
+ * \file page-static.h
+ * \brief Route /static.
+ */
+
 struct kreq;
 
+/**
+ * Implement /static/<res> route.
+ */
 void
 page_static(struct kreq *, const char * const * args);
 

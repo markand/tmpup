@@ -20,6 +20,11 @@
 #define TMPUPD_HTTP_H
 
 /**
+ * \file http.h
+ * \brief HTTP request handling.
+ */
+
+/**
  * Initialize HTTP system.
  */
 void
