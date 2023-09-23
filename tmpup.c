@@ -249,9 +249,9 @@ main(int argc, char **argv)
 
 	opterr = 0;
 
-	/* All types start with a short duration of one hour. */
+	/* Start with a duration of one day (to match HTML pages). */
 	start = time(NULL);
-	end = start + 3600;
+	end = start + TMP_DURATION_DAY;
 
 	while ((ch = egetopt(argc, argv, "a:e:f:h:l:pt:v")) != -1) {
 		switch (ch) {
