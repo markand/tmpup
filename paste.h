@@ -87,6 +87,13 @@ struct paste {
 	 * Expiration date.
 	 */
 	time_t end;
+
+	/**
+	 * (read-write)
+	 *
+	 * If non-zero lists the paste in the index and searches.
+	 */
+	int visible;
 };
 
 /**
@@ -116,6 +123,7 @@ extern const size_t paste_langsz;
  * \param code the paste code content
  * \param start paste creation date
  * \param end paste expiration date
+ * \param visible non-zero to make the paste public
  */
 void
 paste_init(struct paste *paste,
@@ -126,7 +134,8 @@ paste_init(struct paste *paste,
            const char *language,
            const char *code,
            time_t start,
-           time_t end);
+           time_t end,
+           int visible);
 
 /**
  * Produce a JSON representation of that paste.

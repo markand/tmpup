@@ -53,7 +53,8 @@ enum {
 	KW_FILENAME,
 	KW_ID,
 	KW_LANGUAGES,
-	KW_TITLE
+	KW_TITLE,
+	KW_VISIBILITY
 };
 
 static const char * const keywords[] = {
@@ -68,7 +69,8 @@ static const char * const keywords[] = {
 	[KW_FILENAME]         = "filename",
 	[KW_ID]               = "id",
 	[KW_LANGUAGES]        = "languages",
-	[KW_TITLE]            = "title"
+	[KW_TITLE]            = "title",
+	[KW_VISIBILITY]       = "visibility"
 };
 
 static inline int
@@ -152,6 +154,10 @@ format(size_t index, void *data)
 	case KW_TITLE:
 		if (self->paste)
 			khtml_printf(&self->html, "%s", self->paste->title);
+		break;
+	case KW_VISIBILITY:
+		if (self->paste)
+			khtml_printf(&self->html, "%s", tmpupd_visibility(self->paste->visible));
 		break;
 	default:
 		break;
@@ -291,6 +297,7 @@ post(struct kreq *r)
 	           *code = NULL,
 	           *duration = "day";
 	time_t start, end;
+	int visible = 0;
 
 	if (tmpupd_open(&db, DB_RDWR) < 0) {
 		route_status(r, KHTTP_500, KMIME_TEXT_HTML);
@@ -310,10 +317,12 @@ post(struct kreq *r)
 			code = r->fields[i].val;
 		else if (strcmp(r->fields[i].key, "duration") == 0)
 			duration = r->fields[i].val;
+		else if (strcmp(r->fields[i].key, "visible") == 0)
+			visible = strcmp(r->fields[i].val, "on") == 0;
 	}
 
 	tmpupd_condamn(&start, &end, duration);
-	paste_init(&paste, NULL, title, author, filename, language, code, start, end);
+	paste_init(&paste, NULL, title, author, filename, language, code, start, end, visible);
 
 	if (db_paste_save(&paste, &db) < 0) {
 		log_warn(TAG "unable to create paste: %s", db.error);

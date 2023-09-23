@@ -43,7 +43,8 @@ get(sqlite3_stmt *stmt, void *data)
 		(const char *)sqlite3_column_text(stmt, 4),
 		(const char *)sqlite3_column_text(stmt, 5),
 		(time_t)sqlite3_column_int64(stmt, 6),
-		(time_t)sqlite3_column_int64(stmt, 7)
+		(time_t)sqlite3_column_int64(stmt, 7),
+		(int)sqlite3_column_int(stmt, 8)
 	);
 }
 
@@ -53,7 +54,7 @@ db_paste_save(struct paste *paste, struct db *db)
 	assert(paste);
 	assert(db);
 
-	return db_insert(db, (const char *)sql_paste_save, "sssssstt",
+	return db_insert(db, (const char *)sql_paste_save, "ssssssttd",
 		paste->id,
 		paste->title,
 		paste->author,
@@ -61,7 +62,8 @@ db_paste_save(struct paste *paste, struct db *db)
 		paste->language,
 		paste->code,
 		paste->start,
-		paste->end
+		paste->end,
+		paste->visible
 	);
 }
 

@@ -6,5 +6,6 @@ insert into `paste`(
 	`language`,
 	`code`,
 	`start`,
-	`end`
-) values (?, ?, ?, ?, ?, ?, ?, ?)
+	`end`,
+	`visible`
+) values (?, ?, ?, ?, ?, ?, ?, ?, ?)

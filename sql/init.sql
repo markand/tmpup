@@ -6,7 +6,8 @@ create table if not exists `paste`(
 	`language`      TEXT not NULL,
 	`code`          TEXT not NULL,
 	`start`         INTEGER not NULL,
-	`end`           INTEGER not NULL
+	`end`           INTEGER not NULL,
+	`visible`       INTEGER not NULL default 0
 ) STRICT;
 
 create table if not exists `image`(
@@ -16,7 +17,8 @@ create table if not exists `image`(
 	`filename`      TEXT not NULL,
 	`data`          BLOB not NULL,
 	`start`         INTEGER not NULL,
-	`end`           INTEGER not NULL
+	`end`           INTEGER not NULL,
+	`visible`       INTEGER not NULL default 0
 ) STRICT;
 
 create table if not exists `setting`(

@@ -216,7 +216,8 @@ paste_init(struct paste *paste,
            const char *language,
            const char *code,
            time_t start,
-           time_t end)
+           time_t end,
+           int visible)
 {
 	assert(paste);
 
@@ -234,6 +235,7 @@ paste_init(struct paste *paste,
 	paste->code = estrdup(code ? code : TMP_DEFAULT_CODE);
 	paste->start = start;
 	paste->end = end;
+	paste->visible = visible;
 }
 
 void
@@ -254,7 +256,7 @@ paste_dump(const struct paste *paste)
 {
 	assert(paste);
 
-	return tmp_json("{ss* ss* ss* ss* ss* ss sI sI}",
+	return tmp_json("{ss* ss* ss* ss* ss* ss sI sI sb}",
 		"id",           paste->id,
 		"title",        paste->title,
 		"author",       paste->author,
@@ -262,7 +264,8 @@ paste_dump(const struct paste *paste)
 		"language",     paste->language,
 		"code",         paste->code,
 		"start",        (json_int_t)paste->start,
-		"end",          (json_int_t)paste->end
+		"end",          (json_int_t)paste->end,
+		"visible",      paste->visible
 	);
 }
 
@@ -273,18 +276,19 @@ paste_parse(struct paste *paste, const char *text, char *error, size_t errorsz)
 	json_int_t start = 0, end = 0;
 	json_t *doc;
 	json_error_t err;
-	int rv;
+	int rv, visible = 0;
 
 	memset(paste, 0, sizeof (*paste));
 
-	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s s?s s?s s?I s?I}",
+	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s s?s s?s s?I s?I s?b}",
 		"title",        &title,
 		"author",       &author,
 		"filename",     &filename,
 		"language",     &language,
 		"code",         &code,
 		"start",        &start,
-		"end",          &end
+		"end",          &end,
+		"visible",      &visible
 	);
 
 	if (rv < 0) {
@@ -297,7 +301,7 @@ paste_parse(struct paste *paste, const char *text, char *error, size_t errorsz)
 	    check_duration(start, end, error, errorsz) < 0)
 		return -1;
 
-	paste_init(paste, NULL, title, author, filename, language, code, start, end);
+	paste_init(paste, NULL, title, author, filename, language, code, start, end, visible);
 	json_decref(doc);
 
 	return 0;

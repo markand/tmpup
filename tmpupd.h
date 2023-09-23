@@ -48,6 +48,16 @@ const char *
 tmpupd_expiresin(time_t start, time_t end);
 
 /**
+ * Returns either "visible" or "hidden" depending if val is zero or non-zero
+ * respectively.
+ *
+ * \param val the item visibility.
+ * \return a compile-time string
+ */
+const char *
+tmpupd_visibility(int val);
+
+/**
  * Sets start and end arguments to the appropriate time depending on the
  * duration field which can be one of: `hour`, `day`, `week`, `month`.
  *

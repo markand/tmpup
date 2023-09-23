@@ -41,7 +41,8 @@ get(sqlite3_stmt *stmt, void *data)
 		(const unsigned char *)sqlite3_column_blob(stmt, 5),
 		(size_t)sqlite3_column_int64(stmt, 0),
 		(time_t)sqlite3_column_int64(stmt, 6),
-		(time_t)sqlite3_column_int64(stmt, 7)
+		(time_t)sqlite3_column_int64(stmt, 7),
+		(int)sqlite3_column_int(stmt, 8)
 	);
 }
 
@@ -51,14 +52,15 @@ db_image_save(struct image *image, struct db *db)
 	assert(image);
 	assert(db);
 
-	return db_insert(db, (const char *)sql_image_save, "ssssbtt",
+	return db_insert(db, (const char *)sql_image_save, "ssssbttd",
 		image->id,
 		image->title,
 		image->author,
 		image->filename,
 		image->data, image->datasz,
 		image->start,
-		image->end
+		image->end,
+		image->visible
 	);
 }
 

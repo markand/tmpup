@@ -48,7 +48,8 @@ enum {
 	KW_DURATIONS,
 	KW_EXPIRES,
 	KW_ID,
-	KW_TITLE
+	KW_TITLE,
+	KW_VISIBILITY
 };
 
 static const char * const keywords[] = {
@@ -58,7 +59,8 @@ static const char * const keywords[] = {
 	[KW_DURATIONS]          = "durations",
 	[KW_EXPIRES]            = "expires",
 	[KW_ID]                 = "id",
-	[KW_TITLE]              = "title"
+	[KW_TITLE]              = "title",
+	[KW_VISIBILITY]         = "visibility"
 };
 
 static int
@@ -98,6 +100,10 @@ format(size_t index, void *data)
 	case KW_TITLE:
 		if (self->image)
 			khtml_printf(&self->html, "%s", self->image->title);
+		break;
+	case KW_VISIBILITY:
+		if (self->image)
+			khtml_printf(&self->html, "%s", tmpupd_visibility(self->image->visible));
 		break;
 	default:
 		break;
@@ -206,6 +212,7 @@ post(struct kreq *r)
 	           *duration = "day";
 	const unsigned char *data = NULL;
 	time_t start, end;
+	int visible = 0;
 	size_t datasz = 0;
 
 	if (tmpupd_open(&db, DB_RDWR) < 0) {
@@ -228,11 +235,12 @@ post(struct kreq *r)
 
 			data = (const unsigned char *)r->fields[i].val;
 			datasz = r->fields[i].valsz;
-		}
+		} else if (strcmp(r->fields[i].key, "visible") == 0)
+			visible = strcmp(r->fields[i].val, "on") == 0;
 	}
 
 	tmpupd_condamn(&start, &end, duration);
-	image_init(&image, NULL, title, author, filename, data, datasz, start, end);
+	image_init(&image, NULL, title, author, filename, data, datasz, start, end, visible);
 
 	if (db_image_save(&image, &db) < 0) {
 		log_warn(TAG "unable to create image: %s", db.error);

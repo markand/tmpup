@@ -40,7 +40,7 @@ static const char *title, *author, *filename, *language;
 static const char *host = "http://localhost";
 static long timeout = 3;
 static time_t start, end;
-static int debug = 0;
+static int debug, visible;
 
 static void
 usage(void)
@@ -164,7 +164,7 @@ cmd_image(int argc, char **argv)
 	}
 
 	image_init(&image, NULL, title, author, filename,
-	    (const unsigned char *)contents, contentsz, start, end);
+	    (const unsigned char *)contents, contentsz, start, end, visible);
 	dump = image_dump(&image);
 
 	post(&req, "api/v0/image", dump);
@@ -193,7 +193,7 @@ cmd_paste(int argc, char **argv)
 
 	readall(argc >= 2 ? argv[1] : NULL, &code, &codesz);
 
-	paste_init(&paste, NULL, title, author, filename, language, code, start, end);
+	paste_init(&paste, NULL, title, author, filename, language, code, start, end, visible);
 	dump = paste_dump(&paste);
 
 	post(&req, "api/v0/paste", dump);
@@ -253,7 +253,7 @@ main(int argc, char **argv)
 	start = time(NULL);
 	end = start + 3600;
 
-	while ((ch = egetopt(argc, argv, "a:e:f:h:l:t:v")) != -1) {
+	while ((ch = egetopt(argc, argv, "a:e:f:h:l:pt:v")) != -1) {
 		switch (ch) {
 		case 'a':
 			author = optarg;
@@ -269,6 +269,9 @@ main(int argc, char **argv)
 			break;
 		case 'l':
 			language = optarg;
+			break;
+		case 'p':
+			visible = 1;
 			break;
 		case 't':
 			title = optarg;

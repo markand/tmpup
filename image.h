@@ -87,6 +87,13 @@ struct image {
 	 * Expiration date.
 	 */
 	time_t end;
+
+	/**
+	 * (read-write)
+	 *
+	 * If non-zero lists the image in the index and searches.
+	 */
+	int visible;
 };
 
 /**
@@ -106,6 +113,7 @@ struct image {
  * \param datasz image content length
  * \param start image creation date
  * \param end image expiration date
+ * \param visible non-zero to make the image public
  */
 void
 image_init(struct image *image,
@@ -116,7 +124,8 @@ image_init(struct image *image,
            const unsigned char *data,
            size_t datasz,
            time_t start,
-           time_t end);
+           time_t end,
+           int visible);
 
 /**
  * Produce a JSON representation of that image.

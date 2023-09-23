@@ -219,6 +219,12 @@ tmpupd_expiresin(time_t start, time_t end)
 	return ret;
 }
 
+const char *
+tmpupd_visibility(int val)
+{
+	return val ? "visible" : "hidden";
+}
+
 void
 tmpupd_condamn(time_t *start, time_t *end, const char *duration)
 {

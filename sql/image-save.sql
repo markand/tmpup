@@ -5,5 +5,6 @@ insert into `image`(
 	`filename`,
 	`data`,
 	`start`,
-	`end`
-) values (?, ?, ?, ?, ?, ?, ?)
+	`end`,
+	`visible`
+) values (?, ?, ?, ?, ?, ?, ?, ?)

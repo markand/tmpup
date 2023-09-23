@@ -36,7 +36,8 @@ image_init(struct image *image,
            const unsigned char *data,
            size_t datasz,
            time_t start,
-           time_t end)
+           time_t end,
+           int visible)
 {
 	assert(image);
 	assert(data);
@@ -56,6 +57,7 @@ image_init(struct image *image,
 	image->datasz = datasz;
 	image->start = start;
 	image->end = end;
+	image->visible = visible;
 }
 
 void
@@ -86,14 +88,15 @@ image_dump(const struct image *image)
 
 	b64_encode(image->data, image->datasz, enc, encsz);
 
-	ret = tmp_json("{ss* ss* ss* ss* ss sI sI}",
+	ret = tmp_json("{ss* ss* ss* ss* ss sI sI sb}",
 		"id",           image->id,
 		"title",        image->title,
 		"author",       image->author,
 		"filename",     image->filename,
 		"data",         enc,
 		"start",        (json_int_t)image->start,
-		"end",          (json_int_t)image->end
+		"end",          (json_int_t)image->end,
+		"visible",      image->visible
 	);
 	free(enc);
 
@@ -107,19 +110,20 @@ image_parse(struct image *image, const char *text, char *error, size_t errorsz)
 	json_int_t start = 0, end = 0;
 	size_t datasz = 0, decsz;
 	json_t *doc = NULL;
-	json_error_t err = {};
-	int rv;
+	json_error_t err;
+	int rv, visible = 0;
 	unsigned char *dec;
 
 	memset(image, 0, sizeof (*image));
 
-	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s s?s% s?I s?I}",
+	rv = tmp_parse(&doc, &err, text, "{s?s s?s s?s s?s% s?I s?I s?b}",
 		"title",        &title,
 		"author",       &author,
 		"filename",     &filename,
 		"data",         &data, &datasz,
 		"start",        &start,
-		"end",          &end
+		"end",          &end,
+		"visible",      &visible
 	);
 
 	if (rv < 0) {
@@ -142,7 +146,7 @@ image_parse(struct image *image, const char *text, char *error, size_t errorsz)
 		bstrlcpy(error, strerror(errno), errorsz);
 	} else {
 		rv = 0;
-		image_init(image, NULL, title, author, filename, dec, decsz, start, end);
+		image_init(image, NULL, title, author, filename, dec, decsz, start, end, visible);
 	}
 
 	free(dec);
