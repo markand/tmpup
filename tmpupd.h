@@ -38,14 +38,13 @@ tmpupd_open(struct db *db, enum db_mode mode);
 
 /**
  * Returns a static string with a human format telling the duration left for
- * the given timestamp range.
+ * the item using its expiration timestamp.
  *
- * \param start UTC start timestamp
  * \param end UTC end timestamp
  * \return a static thread local string with the left time
  */
 const char *
-tmpupd_expiresin(time_t start, time_t end);
+tmpupd_expiresin(time_t end);
 
 /**
  * Returns either "visible" or "hidden" depending if val is zero or non-zero

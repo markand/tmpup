@@ -90,8 +90,7 @@ format(size_t index, void *data)
 		break;
 	case KW_EXPIRES:
 		if (self->image)
-			khtml_printf(&self->html, "%s",
-			    tmpupd_expiresin(self->image->start, self->image->end));
+			khtml_printf(&self->html, "%s", tmpupd_expiresin(self->image->end));
 		break;
 	case KW_ID:
 		if (self->image)

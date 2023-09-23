@@ -120,7 +120,7 @@ format(size_t index, void *data)
 	case KW_EXPIRES:
 		if (self->paste)
 			khtml_printf(&self->html, "%s",
-			    tmpupd_expiresin(self->paste->start, self->paste->end));
+			    tmpupd_expiresin(self->paste->end));
 		break;
 	case KW_ID:
 		if (self->paste)

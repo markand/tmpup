@@ -103,7 +103,7 @@ format_pastes(struct self *self)
 
 		/* language */
 		khtml_elem(&self->html, KELEM_TD);
-		khtml_printf(&self->html, "%s", tmpupd_expiresin(p->start, p->end));
+		khtml_printf(&self->html, "%s", tmpupd_expiresin(p->end));
 		khtml_closeelem(&self->html, 1);
 
 		khtml_closeelem(&self->html, 0);
@@ -146,7 +146,7 @@ format_images(struct self *self)
 
 		/* expiration */
 		khtml_elem(&self->html, KELEM_TD);
-		khtml_printf(&self->html, "%s", tmpupd_expiresin(img->start, img->end));
+		khtml_printf(&self->html, "%s", tmpupd_expiresin(img->end));
 		khtml_closeelem(&self->html, 1);
 
 		khtml_closeelem(&self->html, 0);
