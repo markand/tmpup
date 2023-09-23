@@ -26,10 +26,6 @@
 #include <string.h>
 #include <time.h>
 
-#if defined(WITH_MAGIC)
-#       include <magic.h>
-#endif
-
 #include "check.h"
 #include "db-image.h"
 #include "db-paste.h"
@@ -48,14 +44,10 @@
 static const char *dbpath = VARDIR "/db/tmpup/tmpup.db";
 static sigset_t sigs;
 
-#if defined(WITH_MAGIC)
-static magic_t cookie;
-#endif
-
 static void
 prune(void)
 {
-	struct db db = {};
+	struct db db;
 
 	if (tmpupd_open(&db, DB_RDWR) < 0) {
 		log_warn(TAG "skipping");
@@ -106,7 +98,7 @@ init_signals(void)
 static inline void
 init_db(void)
 {
-	struct db db = {};
+	struct db db;
 
 	/*
 	 * Initialize at least once to get table populated since some pages
