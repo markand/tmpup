@@ -67,7 +67,7 @@ url(const char *fmt, ...)
 static void
 format_pastes(struct self *self)
 {
-	struct paste pastes[LIMIT] = {}, *p;
+	struct paste pastes[LIMIT], *p;
 	ssize_t pastesz;
 
 	if ((pastesz = db_paste_recents(pastes, LEN(pastes), &self->db)) < 0)
@@ -103,7 +103,7 @@ format_pastes(struct self *self)
 
 		/* language */
 		khtml_elem(&self->html, KELEM_TD);
-		khtml_printf(&self->html, "expiration");
+		khtml_printf(&self->html, "%s", tmpupd_expiresin(p->start, p->end));
 		khtml_closeelem(&self->html, 1);
 
 		khtml_closeelem(&self->html, 0);
@@ -115,7 +115,7 @@ format_pastes(struct self *self)
 static void
 format_images(struct self *self)
 {
-	struct image images[LIMIT] = {}, *img;
+	struct image images[LIMIT], *img;
 	ssize_t imagesz;
 
 	if ((imagesz = db_image_recents(images, LEN(images), &self->db)) < 0)
