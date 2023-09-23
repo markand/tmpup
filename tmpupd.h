@@ -21,8 +21,9 @@
 
 #include <time.h>
 
-struct db;
 enum db_mode;
+struct db;
+struct kpair;
 
 /**
  * Convenient function to open and initialize the database depending on the
@@ -72,5 +73,17 @@ tmpupd_visibility(int val);
  */
 void
 tmpupd_condamn(time_t *start, time_t *end, const char *duration);
+
+/**
+ * Check if a form field is defined and non-zero
+ *
+ * \pre pair != NULL
+ * \pre key != NULL
+ * \param pair the form field
+ * \param key the field name to check
+ * \return non-zero if value is usable
+ */
+int
+tmpupd_isdef(const struct kpair *pair, const char *key);
 
 #endif /* !TMPUPD_H */

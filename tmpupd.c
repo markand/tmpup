@@ -36,6 +36,7 @@
 #include "db.h"
 #include "http.h"
 #include "log.h"
+#include "route.h"
 #include "tmp.h"
 #include "tmpupd.h"
 #include "util.h"
@@ -252,6 +253,12 @@ tmpupd_condamn(time_t *start, time_t *end, const char *duration)
 		*end += TMP_DURATION_MONTH;
 	else
 		*end += TMP_DURATION_HOUR;
+}
+
+int
+tmpupd_isdef(const struct kpair *pair, const char *key)
+{
+	return strcmp(pair->val, key) == 0 && strlen(pair->val) > 0;
 }
 
 int

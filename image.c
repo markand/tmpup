@@ -23,6 +23,7 @@
 
 #include "base64.h"
 #include "check.h"
+#include "default-image.h"
 #include "image.h"
 #include "tmp.h"
 #include "util.h"
@@ -40,7 +41,6 @@ image_init(struct image *image,
            int visible)
 {
 	assert(image);
-	assert(data);
 	assert(end > start);
 
 	memset(image, 0, sizeof (*image));
@@ -53,8 +53,16 @@ image_init(struct image *image,
 	image->title = estrdup(title ? title : TMP_DEFAULT_TITLE);
 	image->author = estrdup(author ? author : TMP_DEFAULT_AUTHOR);
 	image->filename = estrdup(filename ? filename : TMP_DEFAULT_FILENAME);
-	image->data = ememdup(data, datasz);
-	image->datasz = datasz;
+
+	/* Add some fun to trollers. */
+	if (data) {
+		image->data = ememdup(data, datasz);
+		image->datasz = datasz;
+	} else {
+		image->data = ememdup(wow, sizeof (wow));
+		image->datasz = sizeof (wow);
+	}
+
 	image->start = start;
 	image->end = end;
 	image->visible = visible;

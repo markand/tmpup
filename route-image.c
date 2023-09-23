@@ -220,13 +220,13 @@ post(struct kreq *r)
 	}
 
 	for (size_t i = 0; i < r->fieldsz; ++i) {
-		if (strcmp(r->fields[i].key, "title") == 0 && r->fields[i].valsz)
+		if (tmpupd_isdef(&r->fields[i], "title"))
 			title = r->fields[i].val;
-		else if (strcmp(r->fields[i].key, "author") == 0 && r->fields[i].valsz)
+		else if (tmpupd_isdef(&r->fields[i], "author"))
 			author = r->fields[i].val;
-		else if (strcmp(r->fields[i].key, "filename") == 0 && r->fields[i].valsz)
+		else if (tmpupd_isdef(&r->fields[i], "filename"))
 			filename = r->fields[i].val;
-		else if (strcmp(r->fields[i].key, "duration") == 0 && r->fields[i].valsz)
+		else if (tmpupd_isdef(&r->fields[i], "duration"))
 			duration = r->fields[i].val;
 		else if (strcmp(r->fields[i].key, "file") == 0) {
 			if (r->fields[i].file)
@@ -234,7 +234,7 @@ post(struct kreq *r)
 
 			data = (const unsigned char *)r->fields[i].val;
 			datasz = r->fields[i].valsz;
-		} else if (strcmp(r->fields[i].key, "visible") == 0)
+		} else if (tmpupd_isdef(&r->fields[i], "visible"))
 			visible = strcmp(r->fields[i].val, "on") == 0;
 	}
 

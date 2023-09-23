@@ -102,7 +102,6 @@ struct image {
  * Previous fields are ignored.
  *
  * \pre image != NULL
- * \pre data != NULL
  * \pre end > start
  * \param image image to initialize
  * \param id optional unique id (can be NULL)
