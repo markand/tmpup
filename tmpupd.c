@@ -246,7 +246,7 @@ tmpupd_condamn(time_t *start, time_t *end, const char *duration)
 int
 tmpupd_isdef(const struct kpair *pair, const char *key)
 {
-	return strcmp(pair->val, key) == 0 && strlen(pair->val) > 0;
+	return strcmp(pair->key, key) == 0 && strlen(pair->val) > 0;
 }
 
 int
