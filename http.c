@@ -125,14 +125,9 @@ routine(void *data)
 {
 	(void)data;
 
-	sigset_t sigs;
 	struct kfcgi *fcgi;
 	struct kreq req;
 	int run = 1;
-
-	/* No need to block anything. */
-	sigemptyset(&sigs);
-	pthread_sigmask(SIG_SETMASK, &sigs, NULL);
 
 	if (khttp_fcgi_init(&fcgi, NULL, 0, NULL, 0, 0) != KCGI_OK)
 		die("abort: could not allocate FastCGI");
