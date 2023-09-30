@@ -125,9 +125,14 @@ routine(void *data)
 {
 	(void)data;
 
+	sigset_t sigs;
 	struct kfcgi *fcgi;
 	struct kreq req;
 	int run = 1;
+
+	/* No need to block anything. */
+	sigemptyset(&sigs);
+	pthread_sigmask(SIG_SETMASK, &sigs, NULL);
 
 	if (khttp_fcgi_init(&fcgi, NULL, 0, NULL, 0, 0) != KCGI_OK)
 		die("abort: could not allocate FastCGI");
@@ -137,6 +142,7 @@ routine(void *data)
 			process(&req);
 			khttp_free(&req);
 		} else {
+			/* Indicate to main thread to quit. */
 			kill(getpid(), SIGINT);
 			run = 0;
 		}
@@ -171,8 +177,9 @@ http_init(void)
 void
 http_finish(void)
 {
+	pthread_kill(thread, SIGTERM);
+	pthread_join(thread, NULL);
+
 	for (size_t i = 0; i < LEN(routes); ++i)
 		regfree(&routes[i].regex);
-
-	pthread_join(thread, NULL);
 }

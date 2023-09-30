@@ -158,16 +158,12 @@ loop(void)
 
 		switch (n) {
 		case SIGINT:
-			/*
-			 * Raise SIGTERM to use to quit the program, it will
-			 * effectively stop the kcgi loop and thread.
-			 */
 			log_info(TAG "exiting on signal %d", n);
-			raise(SIGTERM);
 			run = 0;
 			break;
 		case SIGALRM:
-			prune();
+			if (run)
+				prune();
 			break;
 		default:
 			break;
