@@ -1,7 +1,7 @@
 /*
  * route-api-v0-paste.c -- route /api/v0/paste
  *
- * Copyright (c) 2023 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2023-2024 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
